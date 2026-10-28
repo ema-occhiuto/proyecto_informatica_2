@@ -57,6 +57,31 @@ class SensorUltrasonico:public Sensor{//Sensor ultrasonico
 
 
 
+class Led{//class para el manejo del led
+
+private:
+int pin;
+
+public:
+
+Led(int pin){
+  this->pin=pin;//constructor del led
+}
+
+void iniciar(){
+  pinMode(pin,OUTPUT);
+}
+
+void encender(){
+  digitalWrite(pin,HIGH);//encendido del led
+}
+
+void apagar(){
+  digitalWrite(pin,LOW);//apagado del led
+}
+};
+
+
 
 
 
