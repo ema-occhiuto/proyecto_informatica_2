@@ -14,5 +14,5 @@ void Led::encender(){
 }
 
 void Led::apagar(){
-  digitalWrite(led,LOW);
+  digitalWrite(pin,LOW);
 }

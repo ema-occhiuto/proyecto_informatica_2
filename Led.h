@@ -11,5 +11,5 @@ class Led{
   void iniciar();
   void encender();
   void apagar();
-}
+};
 #endif
