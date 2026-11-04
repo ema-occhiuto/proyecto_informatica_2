@@ -43,11 +43,11 @@ class ComunicacionArduino {
   }
 
   // RECIBIR MENSAJE DESDE ARDUINO
-  public void recibirMensaje(String mensaje) {
+  public void recibirMensaje(String mensajeArduino) {
 
-    if (mensaje != null) {
+    if (mensajeArduino!=null) {
 
-      ultimoMensaje = mensaje.trim();
+      ultimoMensaje = mensajeArduino.trim();
 
       println("Recibido de Arduino: " + ultimoMensaje);
     }
