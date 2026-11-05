@@ -1,4 +1,4 @@
-class nodo{
+class Nodo{
   
   //ATRIBUTOS
   Usuario usuario;
@@ -7,7 +7,7 @@ class nodo{
   
   //CONSTRUCTOR 
   
-  public nodo(Usuario usuario){
+  public Nodo(Usuario usuario){
     
     this.usuario=usuario;
     this.next=null;
