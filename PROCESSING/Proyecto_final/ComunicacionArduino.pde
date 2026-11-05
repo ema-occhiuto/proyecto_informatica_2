@@ -34,7 +34,8 @@ class ComunicacionArduino {
   // ENVIAR MENSAJE A ARDUINO
   public void enviarMensaje(String mensaje) {
 
-    if (conectado && mensaje != null) {
+    iif (conectado && puerto != null &&
+    mensaje != null && !mensaje.trim().isEmpty()) //evitamos mandar cadenas con espacios
 
       puerto.write(mensaje + "\n");
 
