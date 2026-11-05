@@ -97,7 +97,7 @@ class GestorUsuarios{
   //CARGAR CREDITOS
   public boolean cargarSaldo(String uid,int cantidad){
     
-    Usuario usuario=buscarUsuario(uid);//busca el usuario
+    Usuario usuario=buscarUsuario(uid);//busca el usuario en la lista enlazada
     
     if(usuario==null||cantidad<=0){
       return false;
