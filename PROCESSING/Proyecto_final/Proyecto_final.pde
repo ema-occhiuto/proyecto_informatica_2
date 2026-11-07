@@ -283,6 +283,7 @@ void serialEvent(Serial puerto) {
 
 // PROCESAR MENSAJES RECIBIDOS DESDE ARDUINO
 void procesarMensaje(String mensaje) {
+   //ENVIO DE UID
 
   if (mensaje.startsWith("UID:")) {//esta funcion se encarga que los primeros caracteres que envia arduino coincidan con el mismo
   
@@ -290,6 +291,11 @@ void procesarMensaje(String mensaje) {
  uidRecibido=mensaje.substring(4).trim();//GUARDA LA DIRECCION UID.Aplicamos trim() para que borre el salto de linea
  
   println("UID recibido:"+uidRecibido);
+  }
+  
+  //ENVIO DE INGRESO CONFIRMADO DESDE ARDUINO
+  if(mensaje.equals("INGRESO_CONFIRMADO")){
+    confirmarIngreso();//ESTA FUNCION CONFIRMA EL INGRESO DEL USUARIO
   }
 }
 
@@ -356,7 +362,64 @@ if (ingresoPendiente) {
    
 }
 
+
+
+
+//CONFIRMAMOS INGRESO AL ESTACIONAMIENTO
+void confirmarIngreso(){
   
+  //VERIFICAMOS SI EXISTE UN INGRESO PENDIENTE
+if (!ingresoPendiente) {
+  println("No hay ningun ingreso pendiente");
+  return;
+}
+
+//REGISTRAMOS EL VEHICULO EN LA PLAZA
+boolean registrado=estacionamiento.registrarIngreso(plazaPendiente,uidPendiente);
+
+if(!registrado){
+  println("Error al registrar el vehiculo");
+  return;
+}
+
+//BUSCAMOS AL USUARIO AUTORIZADO
+Usuario usuario=gestor.buscarUsuario(uidPendiente);
+
+if(usuario==null){
+  println("Usuario pendiente no enocntrado");
+  
+  //REVERTIMOS EL REGISTRO
+  estacionamiento.registrarSalida(plazaPendiente);
+  return;
+}
+
+//DESCONTAMOS UN CREDITO
+boolean descontado=usuario.descontarIngreso();
+
+if(!descontado){
+  println("Error al descontar credito");
+  
+  //REVERTIMOS EL REGISTRO
+  estacionamiento.registrarSalida(plazaPendiente);
+  return;
+}
+
+//GUARDAMOS EL SALDO ACTUALIZADO
+gestor.guardarUsuarios();
+
+  println("Ingreso confirmado");
+  println("Usuario: " + usuario.obtenerNombre());
+  println("Plaza: " + plazaPendiente);
+  println("Saldo restante: " + usuario.obtenerSaldo());
+
+  // LIMPIAMOS LAS VARIABLES PENDIENTES
+  uidPendiente = "";
+  plazaPendiente = 0;
+  ingresoPendiente = false;
+  uidRecibido = "";
+}
+
+
 
 // CERRAR CONEXION
 void dispose() {
