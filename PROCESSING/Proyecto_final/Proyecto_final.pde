@@ -5,8 +5,18 @@ ComunicacionArduino comunicacion;
 Estacionamiento estacionamiento;
 GestorUsuarios gestor;
 
+
 //PLAZA SELECCIONADA CON EL MOUSE
 int plazaSeleccionada=0;
+
+// ULTIMO UID RECIBIDO DESDE ARDUINO
+String uidRecibido = "";
+
+// DATOS DEL INGRESO PENDIENTE DEL USUARIO AUTORIZADO
+String uidPendiente = "";
+int plazaPendiente = 0;
+boolean ingresoPendiente = false;
+
 
 
 // COLORES
@@ -16,8 +26,9 @@ color verde = color(60, 200, 130);
 color rojo = color(230, 80, 80);
 color blanco = color(255);
 
-// ULTIMO UID RECIBIDO DESDE ARDUINO
-String uidRecibido = "";
+
+
+
 
 
 void setup() {
@@ -286,6 +297,12 @@ void procesarMensaje(String mensaje) {
 //AUTORIZAR INGRESO AL ESTACIONAMIENTO
 void autorizarIngreso(){
   
+  // VERIFICAMOS SI YA HAY UN INGRESO PENDIENTE
+if (ingresoPendiente) {
+  println("Ya existe un ingreso pendiente");
+  return;
+}
+  
   //VERIFICAMOS QUE TENGAMOS UN UID
   if(uidRecibido.isEmpty()){
     println("No se recibio ninguna tarjeta");
@@ -321,13 +338,22 @@ void autorizarIngreso(){
     //VERIFICAMOS SI SE SELECCIONO UNA PLAZA LIBRE
     if(plazaSeleccionada==0||!estacionamiento.plazaLibre(plazaSeleccionada)){
       println("Seleccione una plaza libre");
+      return;
+    }
     
     //TODAS LAS CONDICIONES SE CUMPLIERON
     println("Ingreso autorizado:"+usuario.obtenerNombre());
     
+    //GUARDAMOS LOS DATOS DEL INGRESO PENDIENTE,esperando confirmacion del segundo sensor
+    uidPendiente=uidRecibido;
+    plazaPendiente=plazaSeleccionada;
+    ingresoPendiente=true;
+    
     //ENVIAMOS LA AUTORIZACION Y EL NOMBRE A ARDUINO
     comunicacion.enviarMensaje("AUTORIZADO"+usuario.obtenerNombre());
-   }
+    
+    println("Esperando la confrimacion del segundo sensor");
+   
 }
 
   
