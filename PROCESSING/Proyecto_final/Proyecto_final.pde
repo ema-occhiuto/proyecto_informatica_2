@@ -203,11 +203,11 @@ void ejecutarBoton(int boton){
   switch(boton){
     
     case 1:
-    probarIngreso();
+    autorizarIngreso();
     break;
     
     case 2:
-    probarSalida();
+    autorizarSalida();
     break;
     
     case 3:
@@ -223,52 +223,6 @@ void ejecutarBoton(int boton){
     break;
   }
 }
-
-
-
-
-//FUNCIONES DE PRUEBA
-
-// PROBAR INGRESO
-void probarIngreso() {
-
-  if (plazaSeleccionada == 0) {
-    println("Primero selecciona una plaza");
-    return;
-  }
-
-  String uidPrueba = "PRUEBA" + millis();//ESTO LE ENVIAMOS COMO MENSAJE
-
-  if (estacionamiento.registrarIngreso(
-      plazaSeleccionada, uidPrueba)) {
-
-    println("Ingreso registrado en plaza " + plazaSeleccionada);
-
-  } else {
-
-    println("No se pudo registrar el ingreso");
-  }
-}
-
-
-// PROBAR SALIDA
-void probarSalida() {
-
-  if (plazaSeleccionada == 0) {
-    println("Primero selecciona una plaza");
-    return;
-  }
-
-  if (estacionamiento.registrarSalida(plazaSeleccionada)) {
-
-    println("Salida registrada de plaza " + plazaSeleccionada);
-
-  } else {
-
-    println("No se pudo registrar la salida");
-  }
-}
-
 
 
 
@@ -302,8 +256,8 @@ void procesarMensaje(String mensaje) {
     confirmarIngreso();//ESTA FUNCION CONFIRMA EL INGRESO DEL USUARIO
     
    //ENVIO DE EGRESO CONFIRMADO DESDE ARDUINO
-   if(mensaje.equals("EGRESO_CONFIRMADO"));
-   confirmarSalida();
+   if(mensaje.equals("SALIDA_CONFIRMADO"));
+    confirmarSalida();
   }
 }
 
@@ -463,6 +417,33 @@ gestor.guardarUsuarios();
   ingresoPendiente = false;
   uidRecibido = "";
 }
+
+
+//CONFIRMAMOS SALIDA DEL ESTACIONAIENTO
+void confirmarSalida(){
+  
+  if(!salidaPendiente){
+    println("No hay ninguna salida pendiente");
+    return;
+  }
+  
+  //REGISTRAMOS LA SALIDA DEL VEHICULO
+  boolean salidaRegistrada=estacionamiento.registrarSalida(plazaSalidaPendiente);
+  
+  if(!salidaRegistrada){
+    println("Error al registrar la salida");
+    return;
+  }
+  
+  //MOSTRAMOS LA CONFIRMACION
+  println("Salida confirmada de la plaza"+plazaSalidaPendiente);
+  
+  //LIMPIAMOS LAS VARIABLES PENDIENTES
+  plazaSalidaPendiente=0;
+  salidaPendiente=false;
+  
+}
+    
 
 
 
