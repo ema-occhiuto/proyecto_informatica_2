@@ -241,22 +241,25 @@ void serialEvent(Serial puerto) {
 
 // PROCESAR MENSAJES RECIBIDOS DESDE ARDUINO
 void procesarMensaje(String mensaje) {
-   //ENVIO DE UID
-
+  
+  mensaje=mensaje.trim();
+  
+  //RECUBIMOS EL UID
   if (mensaje.startsWith("UID:")) {//esta funcion se encarga que los primeros caracteres que envia arduino coincidan con el mismo
   
   //EXTRAEMOS EL UID
  uidRecibido=mensaje.substring(4).trim();//GUARDA LA DIRECCION UID.Aplicamos trim() para que borre el salto de linea
+ println("UID recibido:"+uidRecibido);
  
-  println("UID recibido:"+uidRecibido);
   }
   
   //ENVIO DE INGRESO CONFIRMADO DESDE ARDUINO
   if(mensaje.equals("INGRESO_CONFIRMADO")){
     confirmarIngreso();//ESTA FUNCION CONFIRMA EL INGRESO DEL USUARIO
+  }
     
    //ENVIO DE EGRESO CONFIRMADO DESDE ARDUINO
-   if(mensaje.equals("SALIDA_CONFIRMADO"));
+  if(mensaje.equals("SALIDA_CONFIRMADA")){
     confirmarSalida();
   }
 }
@@ -272,7 +275,7 @@ void autorizarIngreso(){
   }
   
   // VERIFICAMOS SI YA HAY UN INGRESO PENDIENTE
-if (ingresoPendiente) {
+  if (ingresoPendiente||salidaPendiente) {
   println("Ya existe un ingreso pendiente");
   return;
 }
@@ -289,6 +292,7 @@ if (ingresoPendiente) {
   //VERIFICAMOS SI EL USUARIO ESTA REGISTRADO
   if(usuario==null){
     println("Tarjeta no registrada...");
+    
     //ENVIAMOS MENSAJE A ARDUINO
     comunicacion.enviarMensaje("ERROR:TARJETA");
     return;
@@ -301,7 +305,6 @@ if (ingresoPendiente) {
       return;
     }
     
-    
     //VERIFICAMOS SI HAY LUGAR EN EL ESTACIONAMIENTO
     if(!estacionamiento.hayLugar()){
       println("Estacionamiento completo");
@@ -310,7 +313,7 @@ if (ingresoPendiente) {
     }
     
     //VERIFICAMOS SI SE SELECCIONO UNA PLAZA LIBRE
-    if(plazaSeleccionada==0||!estacionamiento.plazaLibre(plazaSeleccionada)){
+    if(!estacionamiento.plazaLibre(plazaSeleccionada)){
       println("Seleccione una plaza libre");
       return;
     }
@@ -324,7 +327,7 @@ if (ingresoPendiente) {
     ingresoPendiente=true;
     
     //ENVIAMOS LA AUTORIZACION Y EL NOMBRE A ARDUINO
-    comunicacion.enviarMensaje("AUTORIZADO"+usuario.obtenerNombre());
+    comunicacion.enviarMensaje("AUTORIZADO:"+usuario.obtenerNombre());
     
     println("Esperando la confrimacion del segundo sensor");
    
@@ -340,7 +343,7 @@ void autorizarSalida(){
   }
   
   //VERIFICAMOS QUE NO HAYA OTRA SALIDA PENDIENTE
-  if(salidaPendiente){
+  if(salidaPendiente||ingresoPendiente){
     println("Ya existe una salida pendiente");
     return;
   }
@@ -384,22 +387,32 @@ if(!registrado){
 //BUSCAMOS AL USUARIO AUTORIZADO
 Usuario usuario=gestor.buscarUsuario(uidPendiente);
 
-if(usuario==null){
-  println("Usuario pendiente no enocntrado");
-  
-  //REVERTIMOS EL REGISTRO
-  estacionamiento.registrarSalida(plazaPendiente);
+if (usuario == null) {
+  println("Error: usuario pendiente no encontrado");
+  println("El vehiculo ingreso, pero no se pudo identificar al usuario");
+
+  // LIMPIAMOS LAS VARIABLES PENDIENTES
+  uidPendiente = "";
+  plazaPendiente = 0;
+  ingresoPendiente = false;
+  uidRecibido = "";
+
   return;
 }
 
 //DESCONTAMOS UN CREDITO
 boolean descontado=usuario.descontarIngreso();
 
-if(!descontado){
+if (!descontado) {
   println("Error al descontar credito");
-  
-  //REVERTIMOS EL REGISTRO
-  estacionamiento.registrarSalida(plazaPendiente);
+  println("El vehiculo ingreso, pero el saldo no se actualizo");
+
+  // LIMPIAMOS LAS VARIABLES PENDIENTES
+  uidPendiente = "";
+  plazaPendiente = 0;
+  ingresoPendiente = false;
+  uidRecibido = "";
+
   return;
 }
 
