@@ -17,6 +17,10 @@ String uidPendiente = "";
 int plazaPendiente = 0;
 boolean ingresoPendiente = false;
 
+//DATOS DEL EGRESO PENDIENTE DEL USUARIO ESTACIONADO
+int plazaSalidaPendiente=0;
+boolean salidaPendiente=false;
+
 
 
 // COLORES
@@ -296,12 +300,22 @@ void procesarMensaje(String mensaje) {
   //ENVIO DE INGRESO CONFIRMADO DESDE ARDUINO
   if(mensaje.equals("INGRESO_CONFIRMADO")){
     confirmarIngreso();//ESTA FUNCION CONFIRMA EL INGRESO DEL USUARIO
+    
+   //ENVIO DE EGRESO CONFIRMADO DESDE ARDUINO
+   if(mensaje.equals("EGRESO_CONFIRMADO"));
+   confirmarSalida();
   }
 }
 
 
 //AUTORIZAR INGRESO AL ESTACIONAMIENTO
 void autorizarIngreso(){
+  
+  //VERIFICAMOS QUE SE HAYA SELECCIONADO UNA PLAZA
+  if(plazaSeleccionada==0){
+    println("Primero seleccione una plaza");
+    return;
+  }
   
   // VERIFICAMOS SI YA HAY UN INGRESO PENDIENTE
 if (ingresoPendiente) {
@@ -362,8 +376,39 @@ if (ingresoPendiente) {
    
 }
 
-
-
+//AUTORIZAMOS EGRESO DEL ESTACIONAMIENTO
+void autorizarSalida(){
+  
+  //VERIFICAMOS QUE SE HAYA SELECCIONADO UNA PLAZA
+  if(plazaSeleccionada==0){
+    println("Primero seleccione una plaza");
+    return;
+  }
+  
+  //VERIFICAMOS QUE NO HAYA OTRA SALIDA PENDIENTE
+  if(salidaPendiente){
+    println("Ya existe una salida pendiente");
+    return;
+  }
+    
+  //VERIFICAMOS QUE LA PLAZA ESTE OCUPADA 
+  if(estacionamiento.plazaLibre(plazaSeleccionada)){
+    println("La plaza seleccionada ya esta libre");
+    return;
+  }
+  
+  //GUARDAMOS LA SALIDA PENDIENTE
+  plazaSalidaPendiente=plazaSeleccionada;
+  salidaPendiente=true;
+  
+  //ENVIAMOS LA AUTPRIZACION A ARDUINO
+  comunicacion.enviarMensaje("AUTORIZAR_SALIDA");
+  
+  println("Salida autorizada. Esperando confirmacion del arduino");
+}
+ 
+  
+  
 
 //CONFIRMAMOS INGRESO AL ESTACIONAMIENTO
 void confirmarIngreso(){
@@ -418,6 +463,8 @@ gestor.guardarUsuarios();
   ingresoPendiente = false;
   uidRecibido = "";
 }
+
+
 
 
 
