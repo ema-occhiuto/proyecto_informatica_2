@@ -21,8 +21,15 @@ boolean ingresoPendiente = false;
 int plazaSalidaPendiente=0;
 boolean salidaPendiente=false;
 
-//CONTROLAR SI MOSTRAMOS EL USUARIO
+//DATOS DE REGISTRO USUARIO
 boolean mostrandoRegistro=false;
+// DATOS DEL FORMULARIO
+String nombreRegistro = "";
+String uidRegistro = "";
+String creditosRegistro = "";
+
+// CAMPO SELECCIONADO
+int campoActivo = 0;
 
 
 // COLORES
@@ -200,21 +207,37 @@ void dibujarFormularioRegistro(){
   
   //RECTANGULO BLANCO
   rect(270, 245, 460, 45, 8);
+  //ESCRIBIMOS DENTRO DEL RECTANGULO NOMBRE
+  fill(0);
+  textAlign(LEFT);
+  textSize(18);
+  text(nombreRegistro, 280, 275);
   
   
   //CAMPO UID
-  text("UID",270,330);
+  fill(blanco);
+  text("UID:",270,330);
   
   //RECTANGULO BLANCO
    rect(270, 345, 460, 45, 8);
+   //ESCRIBIMOS DENTRO DEL RECTANGULO UID
+   fill(0);
+   textAlign(LEFT);
+   textSize(18);
+   text(uidRegistro, 280, 375);
    
    
    //CAMPO CREDITOS
+   fill(blanco);
    text("Creditos iniciales:",270,430);
    
    //RECTANGULO BLANCO
     rect(270, 445, 460, 45, 8);
-    
+    //ESCRIBIMOS DENTRO DEL CAMPO CREDITOS
+    fill(0);
+    textAlign(LEFT);
+    textSize(18);
+    text(creditosRegistro, 280, 475);
     
     //BOTON GUARDAR
     fill(verde);
@@ -231,9 +254,35 @@ void dibujarFormularioRegistro(){
 
 //FUNCION DE MOUSSE
 void mousePressed() {
-  //EVITAMOS LA SUPERPOSICION CON LA VENTANA DE REGISTRO
+  
+  //VENTANA DE REGISTRO DE USUARIOS 
   if(mostrandoRegistro){
+      // SELECCIONAR CAMPO NOMBRE
+  if (mouseX >= 270 && mouseX <= 730 &&
+      mouseY >= 245 && mouseY <= 290) {
+
+    campoActivo = 1;
     return;
+  }
+
+  // SELECCIONAR CAMPO UID
+  if (mouseX >= 270 && mouseX <= 730 &&
+      mouseY >= 345 && mouseY <= 390) {
+
+    campoActivo = 2;
+    return;
+  }
+
+  // SELECCIONAR CAMPO CREDITOS
+  if (mouseX >= 270 && mouseX <= 730 &&
+      mouseY >= 445 && mouseY <= 490) {
+
+    campoActivo = 3;
+    return;
+  }
+
+  campoActivo = 0;
+  return;
   }
 
   // SELECCIONAR UNA PLAZA
@@ -276,6 +325,58 @@ void mousePressed() {
   }
 }
 
+//FUNCION DE TECLADO
+void keyPressed(){
+  if(!mostrandoRegistro||campoActivo==0){
+    return;
+  }
+  
+  //BORRAR CARACTERES CON BACKSPACE
+  if(key==BACKSPACE){
+    
+    //ACA ENTRAMOS A ESTE IF SI ESTAMOS POSICIONADOS EN EL RECTANGULO NOMBRE(CAMPO NOMBRE)
+    if(campoActivo==1&&nombreRegistro.length()>0){
+      nombreRegistro=nombreRegistro.substring(0,nombreRegistro.length()-1);//BORRAMOS UN CARACTER 
+    }
+    
+    //CAMPO UID
+    if(campoActivo==2&&uidRegistro.length()>0){
+      uidRegistro=uidRegistro.substring(0,uidRegistro.length()-1);
+    }
+    
+    //CAMPO CREDITOS
+    if(campoActivo==3&&creditosRegistro.length()>0){
+      creditosRegistro=creditosRegistro.substring(0,creditosRegistro.length()-1);
+    }
+    return;
+  }
+  
+  //IGNORAMOS TECLAS ESPECIALES
+   if (key == CODED || key == ENTER || key == RETURN ||
+      key == TAB || key == DELETE || key < 32) {
+    return;
+  }
+
+
+//ESCRIBIR EN EL CAMPO NOMBRE
+if(campoActivo==1){
+  nombreRegistro=nombreRegistro+key;
+}
+
+//ESCIBIR EN EL CAMPO UID
+if(campoActivo==2){
+  uidRegistro+=key;
+}
+
+//ESCRIBIR EN EL CAMPO CREDITOS
+if(campoActivo==3){
+    // SOLO ACEPTAMOS NUMEROS
+    if (key >= '0' && key <= '9') {
+      creditosRegistro += key;
+    }
+}
+  
+}
 
 
 void ejecutarBoton(int boton){
