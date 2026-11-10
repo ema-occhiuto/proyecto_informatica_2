@@ -280,6 +280,12 @@ void mousePressed() {
     campoActivo = 3;
     return;
   }
+  
+  //SELECCIONAR BOTON GUARDAR
+  if(mouseX>=380 && mouseX<=620 &&
+  mouseY>=535 && mouseY<=590){
+    guardarRegistro();
+  }
 
   campoActivo = 0;
   return;
@@ -363,10 +369,6 @@ if(campoActivo==1){
   nombreRegistro=nombreRegistro+key;
 }
 
-//ESCIBIR EN EL CAMPO UID
-if(campoActivo==2){
-  uidRegistro+=key;
-}
 
 //ESCRIBIR EN EL CAMPO CREDITOS
 if(campoActivo==3){
@@ -429,6 +431,11 @@ void procesarMensaje(String mensaje) {
   
   //EXTRAEMOS EL UID
  uidRecibido=mensaje.substring(4).trim();//GUARDA LA DIRECCION UID.Aplicamos trim() para que borre el salto de linea
+ 
+ //SI ESTAMOS REGISTRADO UN USUARIO
+ if(mostrandoRegistro){
+   uidRegistro=uidRecibido;
+ }
  println("UID recibido:"+uidRecibido);
  
   }
