@@ -203,7 +203,7 @@ void dibujarFormularioRegistro(){
   //CAMPO NOMBRE
   textAlign(LEFT);
   textSize(18);
-  text("Nombre:",270,230);
+  text("Nombre y apellido:",270,230);
   
   //RECTANGULO BLANCO
   rect(270, 245, 460, 45, 8);
@@ -284,7 +284,8 @@ void mousePressed() {
   //SELECCIONAR BOTON GUARDAR
   if(mouseX>=380 && mouseX<=620 &&
   mouseY>=535 && mouseY<=590){
-    guardarRegistro();
+    ejecutarBoton(4);
+    return;
   }
 
   campoActivo = 0;
@@ -377,8 +378,9 @@ if(campoActivo==3){
       creditosRegistro += key;
     }
 }
-  
 }
+
+
 
 
 void ejecutarBoton(int boton){
@@ -397,7 +399,7 @@ void ejecutarBoton(int boton){
     break;
     
     case 4:
-    println("Cargar creditos");
+    guardarRegistro();
     break;
     
     default:
@@ -644,6 +646,41 @@ void confirmarSalida(){
   
 }
     
+    
+//GUARDAMOS LOS REGISTROS
+void guardarRegistro(){
+
+// VERIFICAMOS QUE EL CAMPO CREDITOS NO ESTE VACIO
+  if (creditosRegistro.trim().isEmpty()) {
+    println("Error: ingrese los creditos");
+    return;
+  }
+
+  
+//convertimos a int el string creditos
+int saldo=int(creditosRegistro);
+
+
+boolean registrado=gestor.registrarUsuario(nombreRegistro,uidRegistro,saldo);
+
+if(!registrado){
+  println("Usuario registrado incorrectamente");
+  return;
+}
+else{
+  println("Usuario registrado correctamente");
+
+  nombreRegistro = "";
+  uidRegistro = "";
+  creditosRegistro = "";
+
+  mostrandoRegistro = false;
+  campoActivo = 0;
+}
+
+}
+
+
 
 
 
