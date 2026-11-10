@@ -21,6 +21,8 @@ boolean ingresoPendiente = false;
 int plazaSalidaPendiente=0;
 boolean salidaPendiente=false;
 
+//CONTROLAR SI MOSTRAMOS EL USUARIO
+boolean mostrandoRegistro=false;
 
 
 // COLORES
@@ -29,6 +31,7 @@ color panel = color(37, 54, 78);
 color verde = color(60, 200, 130);
 color rojo = color(230, 80, 80);
 color blanco = color(255);
+color azul=color(50,120,220);
 
 
 
@@ -36,7 +39,7 @@ color blanco = color(255);
 
 
 void setup() {
-size(1000,650);
+size(1000,750);
 
 
 //CREAMOS LOS OBJETOS 
@@ -51,6 +54,12 @@ gestor.cargarUsuarios();
 void draw() {
   
   background(fondo);//Se encarga de pintar el fondo de la ventana
+  
+  //VENTANA DE REGISTROS DE USUARIOS
+  if(mostrandoRegistro){
+    dibujarFormularioRegistro();
+  }
+  else{
 
   // TITULO
   fill(blanco);
@@ -70,6 +79,7 @@ void draw() {
   
   //MOSTRAMOS LOS BOTONES DE INGRESO Y SALIDA
   dibujarBotones();
+  }
 }
 
 
@@ -140,7 +150,7 @@ void mostrarContadores() {
 
 
 
-//DIBUJAR BOTONES DE INGRESO Y SALIDA
+//DIBUJAR BOTONES DE INGRESO,SALIDA,REGISTRAR USUARIO,CREDITOS
 void dibujarBotones(){
   
   //BOTON DE INGRESO
@@ -158,13 +168,73 @@ void dibujarBotones(){
   
    fill(blanco);
   text("SALIDA", 675, 550);
+  
+  //BOTON DE REGISTRAR USUARIOS
+  fill(azul);
+  rect(200,610,250,65,12);
+  
+  fill(blanco);
+  textAlign(CENTER);
+  textSize(20);
+  text("REGISTRAR USUARIO",325,650);
 }
 
 
+//DIBUJAR FORMULARIO DE REGISTRO
+void dibujarFormularioRegistro(){
+  //FONDO DEL FORMULARIO
+  fill(panel);
+  rect(200,100,600,530,12);
+  
+  //TITULO 
+  fill(blanco);
+  textAlign(CENTER);
+  textSize(26);
+  text("REGISTRAR USUARIO",500,160);
+  
+  
+  //CAMPO NOMBRE
+  textAlign(LEFT);
+  textSize(18);
+  text("Nombre:",270,230);
+  
+  //RECTANGULO BLANCO
+  rect(270, 245, 460, 45, 8);
+  
+  
+  //CAMPO UID
+  text("UID",270,330);
+  
+  //RECTANGULO BLANCO
+   rect(270, 345, 460, 45, 8);
+   
+   
+   //CAMPO CREDITOS
+   text("Creditos iniciales:",270,430);
+   
+   //RECTANGULO BLANCO
+    rect(270, 445, 460, 45, 8);
+    
+    
+    //BOTON GUARDAR
+    fill(verde);
+    rect(380, 535, 240, 55, 10);
+    
+    fill(blanco);
+    textAlign(CENTER);
+    textSize(20);
+    text("GUARDAR",500,570);
+}
+  
+  
 
 
 //FUNCION DE MOUSSE
 void mousePressed() {
+  //EVITAMOS LA SUPERPOSICION CON LA VENTANA DE REGISTRO
+  if(mostrandoRegistro){
+    return;
+  }
 
   // SELECCIONAR UNA PLAZA
   for (int i = 0; i < 4; i++) {//Aca es para ver que plaza seleccionamos
@@ -187,6 +257,7 @@ void mousePressed() {
       mouseY >= 510 && mouseY <= 575) {
 
       ejecutarBoton(1);
+      return;
   }
 
   // BOTON SALIDA
@@ -194,6 +265,14 @@ void mousePressed() {
       mouseY >= 510 && mouseY <= 575) {
 
      ejecutarBoton(2);
+     return;
+  }
+  
+  //BOTON DE REGISTRAR USUARIOS
+  if(mouseX>=200 && mouseX<=450 &&
+  mouseY>=610 && mouseY<=675){
+    ejecutarBoton(3);
+    return;
   }
 }
 
@@ -211,7 +290,7 @@ void ejecutarBoton(int boton){
     break;
     
     case 3:
-    println("Registrar nuevo usuario");
+   mostrandoRegistro=true;
     break;
     
     case 4:
