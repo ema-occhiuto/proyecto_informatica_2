@@ -45,6 +45,7 @@ color azul=color(50,120,220);
 
 
 
+
 void setup() {
 size(1000,750);
 
@@ -184,7 +185,17 @@ void dibujarBotones(){
   textAlign(CENTER);
   textSize(20);
   text("REGISTRAR USUARIO",325,650);
+  
+  //BOTON DE CREDITOS
+  fill(azul);
+  rect(550,610,250,65,12);
+  
+  fill(blanco);
+  textAlign(CENTER);
+  textSize(20);
+  text("CARGAR CREDITOS",675,650);
 }
+
 
 
 //DIBUJAR FORMULARIO DE REGISTRO
@@ -226,8 +237,7 @@ void dibujarFormularioRegistro(){
    textSize(18);
    text(uidRegistro, 280, 375);
    
-   
-   //CAMPO CREDITOS
+    //CAMPO CREDITOS
    fill(blanco);
    text("Creditos iniciales:",270,430);
    
@@ -291,6 +301,7 @@ void mousePressed() {
   campoActivo = 0;
   return;
   }
+else{
 
   // SELECCIONAR UNA PLAZA
   for (int i = 0; i < 4; i++) {//Aca es para ver que plaza seleccionamos
@@ -331,6 +342,9 @@ void mousePressed() {
     return;
   }
 }
+}
+
+
 
 //FUNCION DE TECLADO
 void keyPressed(){
@@ -379,6 +393,7 @@ if(campoActivo==3){
     }
 }
 }
+
 
 
 
@@ -674,7 +689,7 @@ else{
   uidRegistro = "";
   creditosRegistro = "";
 
-  mostrandoRegistro = false;
+  mostrandoRegistro = false;//Aca salimos de la interface del registro de usuarios
   campoActivo = 0;
 }
 
