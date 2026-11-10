@@ -398,8 +398,13 @@ else{
     if(mouseX>=270 && mouseX<=730 &&
     mouseY>=445 && mouseY<=490){
       campoActivo=4;
+      return;
     }
     
+    campoActivo=0;
+    return;
+    
+  
     
     
     
@@ -469,7 +474,7 @@ else{
 
 //FUNCION DE TECLADO
 void keyPressed(){
-  if(!mostrandoRegistro||campoActivo==0){
+  if((!mostrandoRegistro && !mostrandoCargaCreditos)||campoActivo==0){
     return;
   }
   
@@ -490,6 +495,12 @@ void keyPressed(){
     if(campoActivo==3&&creditosRegistro.length()>0){
       creditosRegistro=creditosRegistro.substring(0,creditosRegistro.length()-1);
     }
+    
+    //CAMPO CREDITOS(VENTANA CARGAR CREDITOS)
+    if(campoActivo==4&&creditosCargar.length()>0){
+      creditosCargar=creditosCargar.substring(0,creditosCargar.length()-1);
+    }
+    
     return;
   }
   
@@ -513,7 +524,15 @@ if(campoActivo==3){
       creditosRegistro += key;
     }
 }
+    
+//ESCRIBIR EN EL CAMPO CREDITO(VENTANA CARGAR CREDITOS)
+if(campoActivo==4){
+  if(key>='0' && key<='9'){
+    creditosCargar+=key;
+  }
 }
+}
+
 
 
 
