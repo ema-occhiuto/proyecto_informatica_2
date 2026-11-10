@@ -400,26 +400,18 @@ else{
       campoActivo=4;
       return;
     }
-    
+     //BOTON DE CARGAR CREDITOS
+  if(mouseX>=380 && mouseX<=620 &&
+  mouseY>=535 && mouseY<=590){
+    ejecutarBoton(6);
+    return;
+  }
     campoActivo=0;
     return;
     
-  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+ 
   }
+  
 else{
   // SELECCIONAR UNA PLAZA
   for (int i = 0; i < 4; i++) {//Aca es para ver que plaza seleccionamos
@@ -559,6 +551,10 @@ void ejecutarBoton(int boton){
     
     case 5:
     mostrandoCargaCreditos=true;
+    break;
+    
+    case 6:
+    guardarCreditos();
     break;
     
     default:
@@ -854,8 +850,35 @@ else{
 
 }
 
+void guardarCreditos(){
+  //VERIFICAMOS QUE EL CAMPO CREDITO NO ESTE VACIO
+  if(creditosCargar.trim().isEmpty()){
+    println("Error:ingrese los creditos");
+    return;
+  }
+  
+  //CONVERTIMOS A ENTERO EL STRING CREDITOS
+  int creditos=int(creditosCargar);
+  
+boolean creditoCargado=gestor.cargarSaldo(uidCargarCreditos,creditos);
 
+if(!creditoCargado){
+  println("Creditos cargados incorrectamente");
+  return;
+}
+else{
+  println("Creditos cargados correctamente");
+  
+  
+  uidCargarCreditos="";
+  nombreCargarCreditos="";
+  creditosCargar="";
 
+//SALIR DE LA VENTANA CARGAR CREDITOS
+mostrandoCargaCreditos=false;
+campoActivo=0;
+}
+}
 
 
 
