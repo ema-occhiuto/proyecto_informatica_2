@@ -33,6 +33,8 @@ String creditosRegistro = "";
 
 //DATOS DE CARGA DE CREDITOS
 String uidCargarCreditos="";
+String nombreCargarCreditos="";
+String creditosCargar="";
 
 // CAMPO SELECCIONADO
 int campoActivo = 0;
@@ -247,7 +249,7 @@ void dibujarFormularioRegistro(){
   
   //RECTANGULO BLANCO
    rect(270, 345, 460, 45, 8);
-   //ESCRIBIMOS DENTRO DEL RECTANGULO UID
+   //COMPLETAR CAMPO UID
    fill(0);
    textAlign(LEFT);
    textSize(18);
@@ -259,7 +261,7 @@ void dibujarFormularioRegistro(){
    
    //RECTANGULO BLANCO
     rect(270, 445, 460, 45, 8);
-    //ESCRIBIMOS DENTRO DEL CAMPO CREDITOS
+    //COMPLETAR CAMPO CREDITOS
     fill(0);
     textAlign(LEFT);
     textSize(18);
@@ -298,6 +300,11 @@ void dibujarFormularioCreditos(){
   //RECTANGULO BLANCO
   fill(blanco);
   rect(270,245,460,45,8);
+  //COMPLETAR CAMPO DE UID
+  fill(0);
+  textAlign(LEFT);
+  textSize(18);
+  text(uidCargarCreditos,280,275);
   
   
   //NOMBRE DEL USUARIO
@@ -306,7 +313,11 @@ void dibujarFormularioCreditos(){
   
   //RECTANGULO BLANCO
   rect(270,345,460,45,8);
-  
+  //COMPLETAR CAMPO NOMBRE
+  fill(0);
+  textAlign(LEFT);
+  textSize(18);
+  text(nombreCargarCreditos,280,375);
   
   //CANTIDAD DE CREDITOS
   fill(blanco);
@@ -314,6 +325,11 @@ void dibujarFormularioCreditos(){
   
   //RECTANGULO BLANCO
   rect(270,445,460,45,8);
+  // MOSTRAMOS LOS CREDITOS INGRESADOS
+  fill(0);
+  textAlign(LEFT);
+  textSize(18);
+  text(creditosCargar, 280, 475);
   
   
   //BOTON CARGAR
@@ -375,7 +391,31 @@ void mousePressed() {
   return;
   }
 else{
-
+  //VENTANA DE CARGA CREDITOS
+  if(mostrandoCargaCreditos){
+    
+    //SELECCIONAR CAMPO CREDITOS
+    if(mouseX>=270 && mouseX<=730 &&
+    mouseY>=445 && mouseY<=490){
+      campoActivo=4;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  }
+else{
   // SELECCIONAR UNA PLAZA
   for (int i = 0; i < 4; i++) {//Aca es para ver que plaza seleccionamos
 
@@ -421,6 +461,7 @@ else{
     ejecutarBoton(5);
     return;
   }
+}
 }
 }
 
@@ -511,13 +552,13 @@ void ejecutarBoton(int boton){
 
 // RECIBIR DATOS DESDE ARDUINO
 void serialEvent(Serial puerto) {
+  
+  if(comunicacion.recibirMensaje()){
 
-  String mensaje = puerto.readStringUntil('\n');//texto recibidio desde arduino que le pasamos como argumento 
-
-  if (mensaje != null) {
-    comunicacion.recibirMensaje(mensaje);//enviamos la informacion a nuestra clase comunicacion
-    procesarMensaje(mensaje);
-  }
+  String mensaje =comunicacion.obtenerUltimoMensaje();
+  
+  procesarMensaje(mensaje);
+}
 }
 
 
@@ -533,6 +574,9 @@ void procesarMensaje(String mensaje) {
   //EXTRAEMOS EL UID
  uidRecibido=mensaje.substring(4).trim();//GUARDA LA DIRECCION UID.Aplicamos trim() para que borre el salto de linea
  
+  println("UID recibido:"+uidRecibido);
+ 
+ 
  //SI ESTAMOS REGISTRADO UN USUARIO
  if(mostrandoRegistro){
    uidRegistro=uidRecibido;
@@ -541,13 +585,19 @@ void procesarMensaje(String mensaje) {
  //SI ESTAMOS CARGANDO CREDITOS
  if(mostrandoCargaCreditos){
    uidCargarCreditos=uidRecibido;
+   
+   Usuario usuario=gestor.buscarUsuario(uidCargarCreditos);//buscamos el usuario con su id, para cargar creditos
+   
+   if(usuario==null){
+     println("usuario no encontrado");
+     nombreCargarCreditos="";//en el caso que no encuentre el usuario;
+     return;
+   }
+   nombreCargarCreditos=usuario.obtenerNombre();
  }
- 
- println("UID recibido:"+uidRecibido);
- 
   }
-  
-  //ENVIO DE INGRESO CONFIRMADO DESDE ARDUINO
+ 
+ //ENVIO DE INGRESO CONFIRMADO DESDE ARDUINO
   if(mensaje.equals("INGRESO_CONFIRMADO")){
     confirmarIngreso();//ESTA FUNCION CONFIRMA EL INGRESO DEL USUARIO
   }
