@@ -44,7 +44,7 @@ class ComunicacionArduino {
   }
 
   // RECIBIR MENSAJE DESDE ARDUINO
-  public String recibirMensaje() {
+  public boolean recibirMensaje() {
     
    String mensajeArduino = puerto.readStringUntil('\n');
 
@@ -54,9 +54,9 @@ class ComunicacionArduino {
 
       println("Recibido de Arduino: " + ultimoMensaje);
       
-      return ultimoMensaje;
+     return true;
     }
-    return null;
+    return false;
   }
 
   // OBTENER EL ULTIMO MENSAJE
