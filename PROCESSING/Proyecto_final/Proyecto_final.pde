@@ -21,15 +21,23 @@ boolean ingresoPendiente = false;
 int plazaSalidaPendiente=0;
 boolean salidaPendiente=false;
 
-//DATOS DE REGISTRO USUARIO
+//BOTON REGISTRO USUARIO
 boolean mostrandoRegistro=false;
+//BOTON CREDITOS
+boolean mostrandoCargaCreditos=false;
+
 // DATOS DEL FORMULARIO
 String nombreRegistro = "";
 String uidRegistro = "";
 String creditosRegistro = "";
 
+//DATOS DE CARGA DE CREDITOS
+String uidCargarCreditos="";
+
 // CAMPO SELECCIONADO
 int campoActivo = 0;
+
+//
 
 
 // COLORES
@@ -59,6 +67,7 @@ estacionamiento=new Estacionamiento(4);
 gestor.cargarUsuarios();
 }
 
+
 void draw() {
   
   background(fondo);//Se encarga de pintar el fondo de la ventana
@@ -68,6 +77,12 @@ void draw() {
     dibujarFormularioRegistro();
   }
   else{
+    if(mostrandoCargaCreditos){
+      dibujarFormularioCreditos();
+    }
+  
+    
+    else{
 
   // TITULO
   fill(blanco);
@@ -87,6 +102,7 @@ void draw() {
   
   //MOSTRAMOS LOS BOTONES DE INGRESO Y SALIDA
   dibujarBotones();
+    }
   }
 }
 
@@ -258,6 +274,63 @@ void dibujarFormularioRegistro(){
     textSize(20);
     text("GUARDAR",500,570);
 }
+
+
+
+void dibujarFormularioCreditos(){
+  //PANEL PRINCIPAL
+  fill(panel);
+  rect(200,100,600,530,12);
+  
+  //TITULO
+  fill(blanco);
+  textAlign(CENTER);
+  textSize(26);
+  text("CARGAR CREDITOS",500,160);
+  
+  
+  //UID DEL USUARIO
+  textAlign(LEFT);
+  textSize(18);
+  fill(blanco);
+  text("UID:",270,230);
+  
+  //RECTANGULO BLANCO
+  fill(blanco);
+  rect(270,245,460,45,8);
+  
+  
+  //NOMBRE DEL USUARIO
+  fill(blanco);
+  text("Nombre y apellido:",270,330);
+  
+  //RECTANGULO BLANCO
+  rect(270,345,460,45,8);
+  
+  
+  //CANTIDAD DE CREDITOS
+  fill(blanco);
+  text("Creditos a cargar",270,430);
+  
+  //RECTANGULO BLANCO
+  rect(270,445,460,45,8);
+  
+  
+  //BOTON CARGAR
+  fill(verde);
+  rect(380,535,240,55,10);
+  
+  fill(blanco);
+  textAlign(CENTER);
+  textSize(20);
+  text("CARGAR",500,570);
+}
+  
+  
+  
+  
+  
+
   
   
 
@@ -341,6 +414,13 @@ else{
     ejecutarBoton(3);
     return;
   }
+  
+  //BOTON DE CREDITOS
+  if(mouseX>=550 && mouseX<=800 &&
+  mouseY>=610 && mouseY<=675){
+    ejecutarBoton(5);
+    return;
+  }
 }
 }
 
@@ -417,6 +497,10 @@ void ejecutarBoton(int boton){
     guardarRegistro();
     break;
     
+    case 5:
+    mostrandoCargaCreditos=true;
+    break;
+    
     default:
     println("Boton no reconocido");
     break;
@@ -453,6 +537,12 @@ void procesarMensaje(String mensaje) {
  if(mostrandoRegistro){
    uidRegistro=uidRecibido;
  }
+ 
+ //SI ESTAMOS CARGANDO CREDITOS
+ if(mostrandoCargaCreditos){
+   uidCargarCreditos=uidRecibido;
+ }
+ 
  println("UID recibido:"+uidRecibido);
  
   }
