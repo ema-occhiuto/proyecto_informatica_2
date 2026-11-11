@@ -17,11 +17,11 @@ void SensorUltrasonico::generarMedicion() {
   digitalWrite(pinTrig, LOW);
   delayMicroseconds(2);
 
-  digitalWrite(pinTrig, HIGH);
+  digitalWrite(pinTrig, HIGH);//MANDA UN PULSO ULTRASONICO
   delayMicroseconds(10);
   digitalWrite(pinTrig, LOW);
 
-  unsigned long duracion = pulseIn(pinEcho, HIGH, 30000UL);//Mide cto tiempo permanece una senal en estado high
+  unsigned long duracion = pulseIn(pinEcho, HIGH, 30000UL);//MIDE CUANTO TARDA EN REGRESAR MEDIANTE EL ECHO
 
   if (duracion == 0) {
     valor = -1;
