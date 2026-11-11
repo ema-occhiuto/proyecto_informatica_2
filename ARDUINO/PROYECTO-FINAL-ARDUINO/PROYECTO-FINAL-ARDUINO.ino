@@ -9,215 +9,117 @@
 
 // OBJETOS
 LectorRFID rfid(10, 9);
-
 Led rojo(6);
 Led verde(5);
-
 Barrera barrera(4, 0, 90);
-
 SensorUltrasonico sensorEntrada(2, 3);
 SensorUltrasonico sensorPaso(7, 8);
-
 PantallaLCD pantalla(0x27, 16, 2);
 
-// CONFIGURACION
-const String UID_AUTORIZADO = "E6BBBC06";
+// DISTANCIA MAXIMA PARA DETECTAR UN VEHICULO
+const float DISTANCIA_MAX = 10.0;
 
-const float DISTANCIA_LIMITE = 15.0;
+//VARIABLES DE CONFIRMACION
+bool vehiculoDetectado=false;
+bool esperandoRespuesta=false;
+bool esperandoPaso=false;
 
-const unsigned long TIEMPO_MAX_ABIERTA = 15000;
-const unsigned long TIEMPO_MENSAJE = 2000;
+void setup(){
+//INICIAMOS LA COMUNICACION SERIAL
+Serial.begin(9600);
 
-// ESTADOS DEL SISTEMA
-enum Estado {
-  ESPERANDO_VEHICULO,
-  ESPERANDO_TARJETA,
-  BARRERA_ABIERTA,
-  ACCESO_RECHAZADO
-};
+//INICIAMOS LOS COMPONENTES
+rfid.iniciar();
+rojo.iniciar();
+verde.iniciar();
+barrera.iniciar();
+sensorEntrada.iniciar();
+sensorPaso.iniciar();
+pantalla.iniciar();
 
-Estado estado = ESPERANDO_VEHICULO;
+//ESTADO DE LED
+verde.apagar();
+rojo.apagar();
 
-// VARIABLES
-unsigned long tiempoApertura = 0;
-unsigned long tiempoRechazo = 0;
+pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 
-bool pasoDetectado = false;
-
-// FUNCION PARA DETECTAR VEHICULOS
-bool detectarVehiculo(SensorUltrasonico &sensor) {
-
-  sensor.generarMedicion();
-
-  float distancia = sensor.leerMedicion();
-
-  return distancia > 0 &&
-         distancia < DISTANCIA_LIMITE;
 }
 
-// FUNCION PARA VOLVER AL ESTADO INICIAL
-void estadoInicial() {
 
-  barrera.cerrar();
+void loop(){
+  //GENERAMOS UNA MEDICION
+  sensorEntrada.generarMedicion();
 
-  verde.apagar();
-  rojo.encender();
+  float distancia=sensorEntrada.leerMedicion();
 
-  pasoDetectado = false;
+  if(distancia>0 && distancia<=DISTANCIA_MAX){
+    if(!vehiculoDetectado){
 
-  estado = ESPERANDO_VEHICULO;
+      vehiculoDetectado=true;
 
-  pantalla.mostrarMensaje(
-    "Estacionamiento",
-    "Acerque vehiculo"
-  );
-}
-
-void setup() {
-
-  Serial.begin(9600);
-
-  // INICIAR COMPONENTES
-  rfid.iniciar();
-
-  rojo.iniciar();
-  verde.iniciar();
-
-  barrera.iniciar();
-
-  sensorEntrada.iniciar();
-  sensorPaso.iniciar();
-
-  pantalla.iniciar();
-
-  pantalla.mostrarMensaje(
-    "Estacionamiento",
-    "Iniciando..."
-  );
-
-  delay(1500);
-
-  estadoInicial();
-}
-
-void loop() {
-
-  switch (estado) {
-
-    // 1. ESPERAR UN VEHICULO
-    case ESPERANDO_VEHICULO:
-
-      if (detectarVehiculo(sensorEntrada)) {
-
-        estado = ESPERANDO_TARJETA;
-
-        pantalla.mostrarMensaje(
-          "Vehiculo presente",
-          "Acerque tarjeta"
-        );
-
-        Serial.println("Vehiculo detectado");
-      }
-
-      break;
-
-    // 2. ESPERAR TARJETA RFID
-    case ESPERANDO_TARJETA:
-
-      if (rfid.hayTarjeta()) {
-
-        String uid = rfid.obtenerUID();
-
-        Serial.print("UID: ");
-        Serial.println(uid);
-
-        if (uid == UID_AUTORIZADO) {
-
-          // ACCESO PERMITIDO
-          rojo.apagar();
-          verde.encender();
-
-          barrera.abrir();
-
-          tiempoApertura = millis();
-          pasoDetectado = false;
-
-          estado = BARRERA_ABIERTA;
-
-          pantalla.mostrarMensaje(
-            "Acceso permitido",
-            "Barrera abierta"
-          );
-
-          Serial.println("ACCESO PERMITIDO");
-
-        } else {
-
-          // ACCESO RECHAZADO
-          rojo.encender();
-          verde.apagar();
-
-          tiempoRechazo = millis();
-
-          estado = ACCESO_RECHAZADO;
-
-          pantalla.mostrarMensaje(
-            "Acceso denegado",
-            "Tarjeta invalida"
-          );
-
-          Serial.println("ACCESO DENEGADO");
-        }
-      }
-
-      break;
-
-    // 3. BARRERA ABIERTA
-    case BARRERA_ABIERTA: {
-
-      bool vehiculoEnPaso = detectarVehiculo(sensorPaso);
-
-      if (vehiculoEnPaso) {
-        pasoDetectado = true;
-      }
-
-      // EL VEHICULO PASO Y LIBERO EL SENSOR
-      if (pasoDetectado && !vehiculoEnPaso) {
-
-        Serial.println("Vehiculo paso la barrera");
-
-        estadoInicial();
-      }
-
-      // TIEMPO MAXIMO DE APERTURA
-      else if (millis() - tiempoApertura >=
-               TIEMPO_MAX_ABIERTA) {
-
-        if (!vehiculoEnPaso) {
-          Serial.println("Tiempo de apertura agotado");
-          estadoInicial();
-        }
-      }
-
-      break;
+      Serial.println("Vehiculo detectado");
+      Serial.println("Acerque su tarjeta RFID");
+      
+      //MOSTRAMOS MENSAJE EN LCD
+      pantalla.mostrarMensaje("Auto detectado", "Acerque tarjeta");
     }
-
-    // 4. ACCESO RECHAZADO
-    case ACCESO_RECHAZADO:
-
-      if (millis() - tiempoRechazo >= TIEMPO_MENSAJE) {
-
-        estado = ESPERANDO_TARJETA;
-
-        pantalla.mostrarMensaje(
-          "Vehiculo presente",
-          "Acerque tarjeta"
-        );
-      }
-
-      break;
   }
 
-  delay(60);
+ 
+  //SI HAY VEHICULO, ESPERAMOS LA TARJETA
+  if(vehiculoDetectado && rfid.hayTarjeta()){
+    
+    String uid=rfid.obtenerUID();
+
+    pantalla.mostrarMensaje("Tarjeta ledia","Espere por favor...");
+
+    Serial.print("UID:");
+    Serial.println(uid);
+
+    //ESPERAMOS LA RESPUESTA DE PROCESSING
+    esperandoRespuesta=true;
+  }
+
+//RECIBIMOS INFORMACION DESDE PROCESSING
+if(Serial.available()>0){
+
+  String mensaje=Serial.readStringUntil('\n');//Recibimos la info que nos llega por puerto serial y la almacenamos
+
+  mensaje.trim();
+
+//VERIFICAMOS SI EL INGRESO FUE AUTORIZADO
+if(esperandoRespuesta && mensaje.startsWith("AUTORIZADO:")){
+//EXTRAEMOS EL NOMBRE DE USUARIO
+  String nombre=mensaje.substring(11);//substring omite las 11 palabras de autorizado
+
+    pantalla.mostrarMensaje("Bienvenido",nombre);
+
+    verde.encender();
+
+    barrera.abrir();
+
+    esperandoRespuesta=false;
+    esperandoPaso=true;
+  }
 }
 
+//BUSCAMOS SEGUNDA CONFIRMACION PARA EL INGRESO DEL VEHICULO
+if(esperandoPaso){
+
+sensorPaso.generarMedicion();
+
+float distanciaPaso=sensorPaso.leerMedicion();//guardamos la medicion 
+
+if(distanciaPaso>0 && distanciaPaso<=DISTANCIA_MAX){//detecta el segundo sensor el vehiculo a esa distancia
+
+Serial.println("INGRESO_CONFIRMADO");
+
+esperandoPaso=false;
+
+barrera.cerrar();//CERRAMOS BARRERA
+
+}
+
+}
+  delay(200);
+}
