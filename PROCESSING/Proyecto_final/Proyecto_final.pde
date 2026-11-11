@@ -416,6 +416,14 @@ else{
     ejecutarBoton(6);
     return;
   }
+  
+  //BOTON DE VOLVER
+  if(mouseX>=380 && mouseX<=620 &&
+  mouseY>=610 && mouseY<=665)
+  {
+    ejecutarBoton(7);
+    return;
+  }
     campoActivo=0;
     return;
     
@@ -467,7 +475,7 @@ else{
   mouseY>=610 && mouseY<=675){
     ejecutarBoton(5);
     return;
-  }
+ }
 }
 }
 }
@@ -565,6 +573,17 @@ void ejecutarBoton(int boton){
     
     case 6:
     guardarCreditos();
+    break;
+    
+    case 7:
+    mostrandoCargaCreditos = false;//CERRAMOS EL FORMULARIO
+    
+    //Las tres variables de string las vaciamos para que no queden guardados los datos
+    uidCargarCreditos = "";
+    nombreCargarCreditos = "";
+    creditosCargar = "";
+
+    campoActivo = 0;
     break;
     
     default:
