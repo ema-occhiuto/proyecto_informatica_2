@@ -282,7 +282,7 @@ void dibujarFormularioRegistro(){
 void dibujarFormularioCreditos(){
   //PANEL PRINCIPAL
   fill(panel);
-  rect(200,100,600,530,12);
+  rect(200,100,600,580,12);
   
   //TITULO
   fill(blanco);
@@ -340,6 +340,16 @@ void dibujarFormularioCreditos(){
   textAlign(CENTER);
   textSize(20);
   text("CARGAR",500,570);
+  
+  
+  //BOTON VOLVER
+  fill(rojo);
+  rect(380,610,240,55,10);
+  
+  fill(blanco);
+  textAlign(CENTER);
+  textSize(20);
+  text("VOLVER",500,645);
 }
   
   
