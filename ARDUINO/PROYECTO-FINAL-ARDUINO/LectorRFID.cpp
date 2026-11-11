@@ -33,7 +33,7 @@ bool LectorRFID::hayTarjeta(){
       ultimoUID += "0";
     }
 
-    ultimoUID += String(lector.uid.uidByte[i], HEX);
+    ultimoUID += String(lector.uid.uidByte[i], HEX);//HACE LA CONVERSION A NUMERO HEX
   }
 
   ultimoUID.toUpperCase();
