@@ -714,8 +714,11 @@ void autorizarIngreso(){
     plazaPendiente=plazaSeleccionada;
     ingresoPendiente=true;
     
+    //CALCULAMOS LOS CREDITOS QUE QUEDARAN DESPUES DEL INGRESO
+    int CreditosRestantes=usuario.obtenerSaldo()-1;
+    
     //ENVIAMOS LA AUTORIZACION Y EL NOMBRE A ARDUINO
-    comunicacion.enviarMensaje("AUTORIZADO:"+usuario.obtenerNombre());
+    comunicacion.enviarMensaje("AUTORIZADO:"+usuario.obtenerNombre()+":"+CreditosRestantes);
     
     println("Esperando la confrimacion del segundo sensor");
    
@@ -746,7 +749,7 @@ void autorizarSalida(){
   plazaSalidaPendiente=plazaSeleccionada;
   salidaPendiente=true;
   
-  //ENVIAMOS LA AUTPRIZACION A ARDUINO
+  //ENVIAMOS LA AUTORIZACION A ARDUINO
   comunicacion.enviarMensaje("AUTORIZAR_SALIDA");
   
   println("Salida autorizada. Esperando confirmacion del arduino");
