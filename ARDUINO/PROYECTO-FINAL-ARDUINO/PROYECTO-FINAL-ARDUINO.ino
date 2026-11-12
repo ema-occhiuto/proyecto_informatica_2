@@ -19,10 +19,17 @@ PantallaLCD pantalla(0x27, 16, 2);
 // DISTANCIA MAXIMA PARA DETECTAR UN VEHICULO
 const float DISTANCIA_MAX = 10.0;
 
+//TIEMPO MAX DE CIERRE DE BARRERA
+const unsigned long TIEMPO_CIERRE=2000;//2 segundos
+
+unsigned long tiempoPaso=0;
+
 //VARIABLES DE CONFIRMACION
 bool vehiculoDetectado=false;
 bool esperandoRespuesta=false;
 bool esperandoPaso=false;
+bool cierrePendiente=false;
+
 
 void setup(){
 //INICIAMOS LA COMUNICACION SERIAL
@@ -110,16 +117,31 @@ sensorPaso.generarMedicion();
 
 float distanciaPaso=sensorPaso.leerMedicion();//guardamos la medicion 
 
+//EL VEHICULO COMEINZA A PASAR
 if(distanciaPaso>0 && distanciaPaso<=DISTANCIA_MAX){//detecta el segundo sensor el vehiculo a esa distancia
+
 
 Serial.println("INGRESO_CONFIRMADO");
 
-esperandoPaso=false;
+//GUARDAMOS CUANDO SE DETECTO EL SEGUNDO SENSOR
+tiempoPaso=millis();
 
-barrera.cerrar();//CERRAMOS BARRERA
+esperandoPaso=false;
+cierrePendiente=true;
+}
 
 }
 
+//ESPERAMOS PARA CERRAR LA BARRERA
+if(cierrePendiente && millis()-tiempoPaso>=TIEMPO_CIERRE){
+
+barrera.cerrar();
+verde.apagar();
+
+cierrePendiente=false;
+vehiculoDetectado=false;
+
+pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 }
   delay(200);
 }
