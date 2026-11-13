@@ -29,8 +29,23 @@ bool vehiculoDetectado=false;
 bool esperandoRespuesta=false;
 bool esperandoPaso=false;
 bool cierrePendiente=false;
+//------------------------------------------------
+//MENSAJE DE PROCESSING
+enum EstadoRespuesta(){
+    SIN_RESPUESTA;
+    AUTORIZADO;
+    ERROR_TARJETA;
+    ERROR_CREDITOS;
+    ERROR_COMPLETO
+};
 
+//ESTADO ACTUAL DE LA RESPUESTA 
+EstadoResouesta respuestaProcessing=SIN_RESPUETA;
 
+//DATOS DEL USUARIO AUTORIZADO
+String nombreAutorizado="";
+int CreditosRestantes=0;
+//-------------------------------------------------
 void setup(){
 //INICIAMOS LA COMUNICACION SERIAL
 Serial.begin(9600);
@@ -144,4 +159,13 @@ vehiculoDetectado=false;
 pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 }
   delay(200);
+}
+
+
+void recibirDatosProcessing(){
+if(Serial.available()>0){
+
+  mensajeProcessing=Serial.readStringUntil('\n');//Recibimos la info que nos llega por puerto serial y la almacenamos
+
+  mensajeProcessing.trim();
 }
