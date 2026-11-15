@@ -31,16 +31,16 @@ bool esperandoPaso=false;
 bool cierrePendiente=false;
 //------------------------------------------------
 //MENSAJE DE PROCESSING
-enum EstadoRespuesta(){
-    SIN_RESPUESTA;
-    AUTORIZADO;
-    ERROR_TARJETA;
-    ERROR_CREDITOS;
+enum EstadoRespuesta{
+    SIN_RESPUESTA,
+    AUTORIZADO,
+    ERROR_TARJETA,
+    ERROR_CREDITOS,
     ERROR_COMPLETO
 };
 
 //ESTADO ACTUAL DE LA RESPUESTA 
-EstadoResouesta respuestaProcessing=SIN_RESPUETA;
+EstadoRespuesta respuestaProcessing=SIN_RESPUESTA;
 
 //DATOS DEL USUARIO AUTORIZADO
 String nombreAutorizado="";
@@ -165,7 +165,51 @@ pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 void recibirDatosProcessing(){
 if(Serial.available()>0){
 
-  mensajeProcessing=Serial.readStringUntil('\n');//Recibimos la info que nos llega por puerto serial y la almacenamos
+  String mensaje=Serial.readStringUntil('\n');//Recibimos la info que nos llega por puerto serial y la almacenamos
 
-  mensajeProcessing.trim();
+  mensaje.trim();
+
+  if(!esperandoRespuesta){
+    return;
+  }
+
+  //VERIFICAMOS SI EL INGRESO FUE AUTORIZADO
+  if(mensaje.startsWith("AUTORIZADO:")){
+
+    int separador=mensaje.indexOf(':',11);//buscamos el segundo separador,la posicion depende del largo del nombre
+    
+    //COMPROBAMOS QUE EXISTE EL CARACTER
+    if(separador!=1){
+    //EXTRAEMOS EL NOMBRE DE USUARIO
+    nombreAutorizado=mensaje.substring(11,separador);
+
+    //EXTRAEMOS LOS CREDITOS RESTATNTES
+    String saldotexto=mensaje.substring(separador+1);//lo guardamos en una variable local
+
+    CreditosRestantes=saldotexto.toInt();//lo convertimos a entero
+
+    //GUARDAMOS EL ESTADO DE AUTORIZACION
+    respuestaProcessing=AUTORIZADO;
+    }
+  }
+  
+  //TARJETA NO REGISTRADA
+  else if(mensaje=="ERROR:TARJETA"){
+    respuestaProcessing=ERROR_TARJETA;
+  }
+
+  //CREDITOS INSUFICIENTES
+  else if(mensaje=="ERROR:CREDITOS"){
+    respuestaProcessing=ERROR_CREDITOS;
+  }
+
+  //ESTACIONAMIENTO COMPLETO
+  else if(mensaje="ERROR:COMPLETO"){
+    respuestaProcessing=ERROR_COMPLETO;
+  }
 }
+}
+
+
+
+
