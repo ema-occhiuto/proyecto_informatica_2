@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -94,6 +93,7 @@ class GestorUsuarios{
    return true;
   }
   
+  
   //CARGAR CREDITOS
   public boolean cargarSaldo(String uid,int cantidad){
     
@@ -127,10 +127,10 @@ class GestorUsuarios{
     return false;
   }
   
-  
+  //Esta funcion la usaremos para sumar o descontar creditos
   //GUARDAR USUARIOS EN ARCHIVO
   public void guardarUsuarios(){
-    
+   //creaWriter, si el archivo no existe, lo crea, sino sobreescribe el mismo 
  PrintWriter output = createWriter(sketchPath(archivo));//lo creamos con el nombre del archivo
    
    //ENCABEZADO DEL ARCHIVO
