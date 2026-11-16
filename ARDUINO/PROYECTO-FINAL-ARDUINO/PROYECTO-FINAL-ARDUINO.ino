@@ -26,6 +26,7 @@ unsigned long tiempoPaso=0;
 
 //TIEMPO QUE MOSTRAMOS EL ERROR POR LCD
 const unsigned long TIEMPO_ERROR=3000;
+const unsigned long TIEMPO_ERROR_ESTACIONAMIENTO=5000;
 //INSTRANTE EN EL QUE OCURRIO EL ERROR
 unsigned long tiempoError=0;
 
@@ -35,6 +36,7 @@ bool esperandoRespuesta=false;
 bool esperandoPaso=false;
 bool cierrePendiente=false;
 bool errorActivo=false;
+bool errorActivoEstacionamiento=false;
 //------------------------------------------------
 //MENSAJE DE PROCESSING
 enum EstadoRespuesta{
@@ -175,7 +177,7 @@ if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
  verde.apagar();
 
  tiempoError=millis();
- errorActivo=true;
+ errorActivoEstacionamiento=true;
 
  //LIMPIAMOS RESPUESTA PROCESSING
  respuestaProcessing=SIN_RESPUESTA;
@@ -183,7 +185,7 @@ if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
 }
 
 
-//verificamos si termino el tiempo de error
+//verificamos si termino el tiempo de error de creditos y usuario
 if(errorActivo && millis()-tiempoError>=TIEMPO_ERROR){
 
 rojo.apagar();
@@ -194,6 +196,18 @@ pantalla.mostrarMensaje("Acerque su", "tarjeta nuevamente");
 errorActivo=false;//FINALIZAMOS EL ESTADO DE ERROR 
 }
 
+
+//VERIFICAMOS SI TERMINO EL TIEMPO ERROR ESTACIONAMIENTO
+if(errorActivoEstacionamiento && millis()-tiempoError>=TIEMPO_ERROR_ESTACIONAMIENTO){
+
+  rojo.apagar();
+
+  //Mostramos mensaje de bienvenida
+  pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
+
+  errorActivoEstacionamiento=false;//FINALIZAMOS EL ESTADO DE EEROR ESTACIONAMIENTO
+  vehiculoDetectado=false;
+}
 
 
 //BUSCAMOS SEGUNDA CONFIRMACION PARA EL INGRESO DEL VEHICULO
