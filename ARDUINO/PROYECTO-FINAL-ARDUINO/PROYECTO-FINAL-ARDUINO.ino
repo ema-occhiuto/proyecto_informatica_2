@@ -20,15 +20,21 @@ PantallaLCD pantalla(0x27, 16, 2);
 const float DISTANCIA_MAX = 10.0;
 
 //TIEMPO MAX DE CIERRE DE BARRERA
-const unsigned long TIEMPO_CIERRE=2000;//2 segundos
+const unsigned long TIEMPO_CIERRE=3000;//3 segundos
 
 unsigned long tiempoPaso=0;
+
+//TIEMPO QUE MOSTRAMOS EL ERROR POR LCD
+const unsigned long TIEMPO_ERROR=3000;
+//INSTRANTE EN EL QUE OCURRIO EL ERROR
+unsigned long tiempoError=0;
 
 //VARIABLES DE CONFIRMACION
 bool vehiculoDetectado=false;
 bool esperandoRespuesta=false;
 bool esperandoPaso=false;
 bool cierrePendiente=false;
+bool errorActivo=false;
 //------------------------------------------------
 //MENSAJE DE PROCESSING
 enum EstadoRespuesta{
@@ -46,6 +52,9 @@ EstadoRespuesta respuestaProcessing=SIN_RESPUESTA;
 String nombreAutorizado="";
 int CreditosRestantes=0;
 //-------------------------------------------------
+
+void recibirDatosProcessing();
+
 void setup(){
 //INICIAMOS LA COMUNICACION SERIAL
 Serial.begin(9600);
@@ -69,6 +78,7 @@ pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 
 
 void loop(){
+
   //GENERAMOS UNA MEDICION
   sensorEntrada.generarMedicion();
 
@@ -93,7 +103,7 @@ void loop(){
     
     String uid=rfid.obtenerUID();
 
-    pantalla.mostrarMensaje("Tarjeta ledia","Espere por favor...");
+    pantalla.mostrarMensaje("Tarjeta ledia", "Espere por favor...");
 
     Serial.print("UID:");
     Serial.println(uid);
@@ -102,19 +112,14 @@ void loop(){
     esperandoRespuesta=true;
   }
 
-//RECIBIMOS INFORMACION DESDE PROCESSING
-if(Serial.available()>0){
+//RECIBIMOS LOS DATOS DE PROCESSING
+  recibirDatosProcessing();
 
-  String mensaje=Serial.readStringUntil('\n');//Recibimos la info que nos llega por puerto serial y la almacenamos
+//INGRESO AUTORIZADO
+if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
 
-  mensaje.trim();
 
-//VERIFICAMOS SI EL INGRESO FUE AUTORIZADO
-if(esperandoRespuesta && mensaje.startsWith("AUTORIZADO:")){
-//EXTRAEMOS EL NOMBRE DE USUARIO
-  String nombre=mensaje.substring(11);//substring omite las 11 palabras de autorizado
-
-    pantalla.mostrarMensaje("Bienvenido",nombre);
+    pantalla.mostrarMensaje(nombreAutorizado, "Creditos:"+String(CreditosRestantes));//MOSTRAMOS POR LCD
 
     verde.encender();
 
@@ -122,8 +127,74 @@ if(esperandoRespuesta && mensaje.startsWith("AUTORIZADO:")){
 
     esperandoRespuesta=false;
     esperandoPaso=true;
-  }
+    
+    //LIMPIAMOS LA RESPUESTA
+    respuestaProcessing=SIN_RESPUESTA;
+
 }
+
+  //TARJETA NO REGISTRADA
+  else if(esperandoRespuesta && respuestaProcessing==ERROR_TARJETA){
+  
+  //MOSTRAMOS POR LCD
+  pantalla.mostrarMensaje("ACCESO DENEGADO", "No registrado");
+
+  rojo.encender();
+  verde.apagar();
+
+  tiempoError=millis();
+  errorActivo=true;
+
+  //LIMPIAMOS RESPUESTA PROCESSING
+  respuestaProcessing=SIN_RESPUESTA;
+  esperandoRespuesta=false;
+}
+
+  //CREDITOS INSUFICIENTES
+  else if(esperandoRespuesta && respuestaProcessing==ERROR_CREDITOS){
+ 
+  pantalla.mostrarMensaje("ACCESO DENEGADO", "Sin credito");
+
+  rojo.encender();
+  verde.apagar();
+
+  tiempoError=millis();
+  errorActivo=true;
+
+  //LIMPIAMOS RESPUESTA PROCESSING
+  respuestaProcessing=SIN_RESPUESTA;
+  esperandoRespuesta=false;
+}
+
+ //ESTACIONAMIENTO COMPLETO
+ else if(esperandoRespuesta && respuestaProcessing==ERROR_COMPLETO){
+
+ pantalla.mostrarMensaje("ESTACIONAMIENTO", "COMPLETO");
+
+ rojo.encender();
+ verde.apagar();
+
+ tiempoError=millis();
+ errorActivo=true;
+
+ //LIMPIAMOS RESPUESTA PROCESSING
+ respuestaProcessing=SIN_RESPUESTA;
+ esperandoRespuesta=false;
+}
+
+
+//verificamos si termino el tiempo de error
+if(errorActivo && millis()-tiempoError>=TIEMPO_ERROR){
+
+rojo.apagar();
+
+//VOLVEMOS A SOLICITAR LA TARJETA 
+pantalla.mostrarMensaje("Acerque su", "tarjeta nuevamente");
+
+errorActivo=false;//FINALIZAMOS EL ESTADO DE ERROR 
+}
+
+
 
 //BUSCAMOS SEGUNDA CONFIRMACION PARA EL INGRESO DEL VEHICULO
 if(esperandoPaso){
@@ -144,7 +215,6 @@ tiempoPaso=millis();
 esperandoPaso=false;
 cierrePendiente=true;
 }
-
 }
 
 //ESPERAMOS PARA CERRAR LA BARRERA
@@ -160,6 +230,10 @@ pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 }
   delay(200);
 }
+
+
+
+
 
 
 void recibirDatosProcessing(){
