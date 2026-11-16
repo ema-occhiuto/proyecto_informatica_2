@@ -89,7 +89,9 @@ void loop(){
 
   float distancia=sensorEntrada.leerMedicion();
 
-  if(distancia>0 && distancia<=DISTANCIA_MAX){
+  if(distancia>0 && distancia<=DISTANCIA_MAX &&
+     !esperandoSalida && !cierrePendiente){
+      
     if(!vehiculoDetectado){
 
       vehiculoDetectado=true;
@@ -123,6 +125,7 @@ void loop(){
 //SALIDA AUTORIZADA
 if(respuestaProcessing==AUTORIZAR_SALIDA){
 esperandoSalida=true;
+pantalla.mostrarMensaje("Ya puedes", "Salir");
 //LIMPIAMOS LA RESPUESTA;
 respuestaProcessing=SIN_RESPUESTA;
 }
@@ -233,6 +236,9 @@ if(distanciaSalida>0 && distanciaSalida<=DISTANCIA_MAX){
   verde.encender();
 
   pantalla.mostrarMensaje("Salida completa", "Hasta luego...");
+
+  //CONFIRMAMOS LA SALIDA A PROCESSING
+  Serial.println("SALIDA_CONFIRMADA");
 
   //INICIAMOS EL TEMPORIZADOR DE CIERRE
   tiempoPaso=millis();
