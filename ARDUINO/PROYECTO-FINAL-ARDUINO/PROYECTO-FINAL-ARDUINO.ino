@@ -37,6 +37,7 @@ bool esperandoPaso=false;
 bool cierrePendiente=false;
 bool errorActivo=false;
 bool errorActivoEstacionamiento=false;
+bool esperandoSalida=false;
 //------------------------------------------------
 //MENSAJE DE PROCESSING
 enum EstadoRespuesta{
@@ -44,7 +45,9 @@ enum EstadoRespuesta{
     AUTORIZADO,
     ERROR_TARJETA,
     ERROR_CREDITOS,
-    ERROR_COMPLETO
+    ERROR_COMPLETO,
+    AUTORIZAR_SALIDA,
+    SALIDA_CONFIRMADA
 };
 
 //ESTADO ACTUAL DE LA RESPUESTA 
@@ -116,6 +119,13 @@ void loop(){
 
 //RECIBIMOS LOS DATOS DE PROCESSING
   recibirDatosProcessing();
+
+//SALIDA AUTORIZADA
+if(respuestaProcessing==AUTORIZAR_SALIDA){
+esperandoSalida=true;
+//LIMPIAMOS LA RESPUESTA;
+respuestaProcessing=SIN_RESPUESTA;
+}
 
 //INGRESO AUTORIZADO
 if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
@@ -209,6 +219,29 @@ if(errorActivoEstacionamiento && millis()-tiempoError>=TIEMPO_ERROR_ESTACIONAMIE
   vehiculoDetectado=false;
 }
 
+//ESPERAMOS QUE EL SENSOR PASO DETECTE LA SALIDA
+if(esperandoSalida){
+sensorPaso.generarMedicion();
+
+//Almacenamos valor 
+float distanciaSalida=sensorPaso.leerMedicion();
+
+if(distanciaSalida>0 && distanciaSalida<=DISTANCIA_MAX){
+
+  //ABRIMOS LA BARRERA
+  barrera.abrir();
+  verde.encender();
+
+  pantalla.mostrarMensaje("Salida completa", "Hasta luego...");
+
+  //INICIAMOS EL TEMPORIZADOR DE CIERRE
+  tiempoPaso=millis();
+
+  cierrePendiente=true;
+  esperandoSalida=false;
+}
+}
+
 
 //BUSCAMOS SEGUNDA CONFIRMACION PARA EL INGRESO DEL VEHICULO
 if(esperandoPaso){
@@ -256,6 +289,12 @@ if(Serial.available()>0){
   String mensaje=Serial.readStringUntil('\n');//Recibimos la info que nos llega por puerto serial y la almacenamos
 
   mensaje.trim();
+
+  // PROCESAMOS LA AUTORIZACION DE SALIDA
+  if (mensaje == "AUTORIZAR_SALIDA") {
+    respuestaProcessing = AUTORIZAR_SALIDA;
+    return;
+  }
 
   if(!esperandoRespuesta){
     return;
