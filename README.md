@@ -11,5 +11,11 @@ El sistema permite identificar usuarios mediante tarjetas RFID, verificar sus cr
 
 También permite gestionar el ingreso y la salida de vehículos, registrar nuevos usuarios, cargar créditos y conservar la información mediante archivos CSV.
 
+##Componenetes electronicos utilizados
+_Arduino uno R3
+_Led rgb(utilizamos solamente red y green)
+_Servo motor
+_2 sensores ultrasonicos(HC-SR04)
+
 
 
