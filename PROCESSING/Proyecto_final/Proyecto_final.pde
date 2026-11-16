@@ -561,6 +561,9 @@ void ejecutarBoton(int boton){
     
     case 3:
    mostrandoRegistro=true;
+   
+   //UTILIZAMOS EL ULTIMO UID RECIBIDO
+   uidRegistro=uidRecibido;
     break;
     
     case 4:
@@ -569,6 +572,18 @@ void ejecutarBoton(int boton){
     
     case 5:
     mostrandoCargaCreditos=true;
+    
+    //UTILIZAMOS EL ULTIMO UID RECIBIDO
+    uidCargarCreditos=uidRecibido;
+    
+    Usuario usuario=gestor.buscarUsuario(uidCargarCreditos);//buscamos el usuario con su id, para cargar creditos
+   
+   if(usuario==null){
+     println("usuario no encontrado");
+     nombreCargarCreditos="";//en el caso que no encuentre el usuario;
+   }else{
+   nombreCargarCreditos=usuario.obtenerNombre();
+   }
     break;
     
     case 6:
@@ -619,26 +634,6 @@ void procesarMensaje(String mensaje) {
  uidRecibido=mensaje.substring(4).trim();//GUARDA LA DIRECCION UID.Aplicamos trim() para que borre el salto de linea
  
   println("UID recibido:"+uidRecibido);
- 
- 
- //SI ESTAMOS REGISTRADO UN USUARIO
- if(mostrandoRegistro){
-   uidRegistro=uidRecibido;
- }
- 
- //SI ESTAMOS CARGANDO CREDITOS
- if(mostrandoCargaCreditos){
-   uidCargarCreditos=uidRecibido;
-   
-   Usuario usuario=gestor.buscarUsuario(uidCargarCreditos);//buscamos el usuario con su id, para cargar creditos
-   
-   if(usuario==null){
-     println("usuario no encontrado");
-     nombreCargarCreditos="";//en el caso que no encuentre el usuario;
-     return;
-   }
-   nombreCargarCreditos=usuario.obtenerNombre();
- }
   }
  
  //ENVIO DE INGRESO CONFIRMADO DESDE ARDUINO
@@ -875,6 +870,7 @@ else{
   nombreRegistro = "";
   uidRegistro = "";
   creditosRegistro = "";
+  uidRecibido="";
 
   mostrandoRegistro = false;//Aca salimos de la interface del registro de usuarios
   campoActivo = 0;
