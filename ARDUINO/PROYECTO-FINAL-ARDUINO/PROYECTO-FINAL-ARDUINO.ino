@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 
 #include "LectorRFID.h"
@@ -87,7 +86,7 @@ void loop(){
   //GENERAMOS UNA MEDICION
   sensorEntrada.generarMedicion();
 
-  float distancia=sensorEntrada.leerMedicion();
+  float distancia=sensorEntrada.leerMedicion();//Guardamos el dato con la presicion del calculo Newton-Raphson
 
   if(distancia>0 && distancia<=DISTANCIA_MAX &&
      !esperandoSalida && !cierrePendiente){
@@ -227,7 +226,7 @@ if(esperandoSalida){
 sensorPaso.generarMedicion();
 
 //Almacenamos valor 
-float distanciaSalida=sensorPaso.leerMedicion();
+float distanciaSalida=sensorPaso.leerMedicion();//Guardamos el dato con la presicion del calculo Newton-Raphson
 
 if(distanciaSalida>0 && distanciaSalida<=DISTANCIA_MAX){
 
@@ -254,7 +253,7 @@ if(esperandoPaso){
 
 sensorPaso.generarMedicion();
 
-float distanciaPaso=sensorPaso.leerMedicion();//guardamos la medicion 
+float distanciaPaso=sensorPaso.leerMedicion();///Guardamos el dato con la presicion del calculo Newton-Raphson
 
 //EL VEHICULO COMEINZA A PASAR
 if(distanciaPaso>0 && distanciaPaso<=DISTANCIA_MAX){//detecta el segundo sensor el vehiculo a esa distancia
