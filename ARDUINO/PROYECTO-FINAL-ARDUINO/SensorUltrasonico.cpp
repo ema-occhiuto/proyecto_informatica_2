@@ -21,11 +21,37 @@ void SensorUltrasonico::generarMedicion() {
   delayMicroseconds(10);
   digitalWrite(pinTrig, LOW);
 
-  unsigned long duracion = pulseIn(pinEcho, HIGH, 30000UL);//MIDE CUANTO TARDA EN REGRESAR MEDIANTE EL ECHO
+  unsigned long duracion = pulseIn(pinEcho, HIGH, 30000UL);//MIDE CUANTO TIEMPO TARDA EN REGRESAR EL SONIDO MEDIANTE EL ECHO(ULTRASEGUNDOS)
 
   if (duracion == 0) {
     valor = -1;
   } else {
-    valor = duracion * 0.0343 / 2.0;//calculamos la distancia de duracion, y lo agregamos en valor
+     
+   // Calculamos la distancia en centimetros
+    float distancia = duracion * 0.0343 / 2.0;
+
+   //--------------------------------------
+   //Calculo por el metodo de Newton-Raphson
+   //--------------------------------------
+
+    // Aproximacion inicial
+    float x = distancia;
+
+    // Metodo de Newton-Raphson
+    for (int i = 0; i < 10; i++) {
+
+      // Funcion obtenida de nuestras mediciones
+      float f = 0.9274 * x + 0.002817 * x * x - distancia;
+
+      // Derivada de la funcion
+      float derivada = 0.9274 + 0.005634 * x;
+
+      // Calculamos una nueva aproximacion
+      x = x - f / derivada;
+    }
+
+    // Guardamos la distancia corregida
+    valor = x;
+    //----------------------------------------------------
   }
 }
