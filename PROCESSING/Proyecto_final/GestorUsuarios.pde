@@ -127,6 +127,7 @@ class GestorUsuarios{
     return false;
   }
   
+  
   //Esta funcion la usaremos para sumar o descontar creditos
   //GUARDAR USUARIOS EN ARCHIVO
   public void guardarUsuarios(){

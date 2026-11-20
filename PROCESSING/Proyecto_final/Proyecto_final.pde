@@ -67,6 +67,9 @@ estacionamiento=new Estacionamiento(4);
 
 //CARGAMOS LOS USUARIOS GUARDADOS
 gestor.cargarUsuarios();
+
+//CARGAMOS LAS PLAZAS
+estacionamiento.cargarPlazas();
 }
 
 
