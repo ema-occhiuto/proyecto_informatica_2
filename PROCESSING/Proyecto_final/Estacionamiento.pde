@@ -3,6 +3,7 @@ class Estacionamiento{
   //ATRIBUTOS PRIVADOS
   private String [] plazas;
   private int capacidadMaxima;
+  private String archivo="estacionamiento.csv";
   
   //CONSTRUCTOR
   public Estacionamiento(int capacidadMaxima){
@@ -75,6 +76,7 @@ public boolean registrarIngreso(int numeroPlaza,String uid){
     
     //ASIGAMOS EL UID A LA PLAZA
     plazas[numeroPlaza-1]=uid.trim();//se guarda sin los espacios
+    guardarPlazas();//Guardamo la plaza en el archivo
     
     return true;
 }
@@ -97,13 +99,64 @@ public boolean registrarSalida(int numeroPlaza){
   
   //LIBERAMOS LA PLAZA
   plazas[numeroPlaza-1]=null;//vaciamos esa plaza
+  guardarPlazas();
   
   return true;//plaza liberada
 }
 
 
+//GUARDAR EL ESTADO DE LAS PLAZAS EN UN ARCHIVO CSV
+public void guardarPlazas(){
+  PrintWriter salida=createWriter(sketchPath(archivo));
+  
+  salida.println("plaza,uid");//encabezado del archivo
+  
+  for(int i=0;i<capacidadMaxima;i++){
+    if(plazas[i]==null){
+      salida.println((i+1)+",LIBRE");
+    }else{
+      salida.println((i+1)+","+plazas[i]);//Aca se guarda el uid en el archivo, en la plaza ocupada.
+    }
+  }
+   salida.flush();
+   salida.close();//cierra el archivo
+}
 
- // OBTENER UID DE UNA PLAZA
+
+
+//RECUPERAR LAS PLAZAS GUARDADAS EN UN ARCHIVO CSV
+public void cargarPlazas(){
+  
+  String[] lineas=loadStrings(archivo);//Guardamos el archivo en un arreglo de cadenas
+  
+  if(lineas==null){
+    return;
+  }
+  
+  for(int i=1;i<lineas.length;i++){//Arrancamos desde i=1 porque i=0 contiene la cabezera del archivo
+  String datos[]=split(lineas[i],',');
+  
+  if(datos.length==2){//2 datos, numero de plaza y uid
+  
+  int numeroplaza=int(datos[0]);//guardamos localmente el numero de la plaza
+  
+  if(numeroplaza>=1 && numeroplaza<=capacidadMaxima){
+    
+    String uid=trim(datos[1]);//Guardamos localmente el uid
+    
+    if(uid.equals("LIBRE")){
+      plazas[numeroplaza-1]=null;//Guardamos el valor en la posicion 0 de la String plazas
+    }else{
+      plazas[numeroplaza-1]=uid;
+    }
+  }
+  }
+  }
+}
+  
+  
+  
+  // OBTENER UID DE UNA PLAZA
   public String obtenerUID(int numeroPlaza) {
 
     if (numeroPlaza < 1 || numeroPlaza > capacidadMaxima) {
