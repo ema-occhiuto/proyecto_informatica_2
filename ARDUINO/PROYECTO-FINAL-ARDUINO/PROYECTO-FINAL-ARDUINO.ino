@@ -19,9 +19,10 @@ PantallaLCD pantalla(0x27, 16, 2);
 const float DISTANCIA_MAX = 10.0;
 
 //TIEMPO MAX DE CIERRE DE BARRERA
-const unsigned long TIEMPO_CIERRE=3000;//3 segundos
+const unsigned long TIEMPO_CIERRE=2000;//3 segundos
 
 unsigned long tiempoPaso=0;
+unsigned long tiempoBuzzer=0;
 
 //TIEMPO QUE MOSTRAMOS EL ERROR POR LCD
 const unsigned long TIEMPO_ERROR=3000;
@@ -37,6 +38,7 @@ bool cierrePendiente=false;
 bool errorActivo=false;
 bool errorActivoEstacionamiento=false;
 bool esperandoSalida=false;
+bool buzzerSonando=false;
 //------------------------------------------------
 //MENSAJE DE PROCESSING
 enum EstadoRespuesta{
@@ -58,6 +60,8 @@ int CreditosRestantes=0;
 //-------------------------------------------------
 
 void recibirDatosProcessing();
+void sonidoAutorizado();
+void sonidoRechazado();
 
 void setup(){
 //INICIAMOS LA COMUNICACION SERIAL
@@ -72,6 +76,9 @@ sensorEntrada.iniciar();
 sensorPaso.iniciar();
 pantalla.iniciar();
 
+//BUZZER
+pinMode(A0,OUTPUT);
+
 //ESTADO DE LED
 verde.apagar();
 rojo.apagar();
@@ -80,11 +87,12 @@ pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 
 }
 
-
+//FUNCION LOOP
 void loop(){
 
   //GENERAMOS UNA MEDICION
   sensorEntrada.generarMedicion();
+
 
   float distancia=sensorEntrada.leerMedicion();//Guardamos el dato con la presicion del calculo Newton-Raphson
 
@@ -121,12 +129,14 @@ void loop(){
 //RECIBIMOS LOS DATOS DE PROCESSING
   recibirDatosProcessing();
 
-//SALIDA AUTORIZADA
+//SALIDA AUTORIZADA POR PROCESSING
 if(respuestaProcessing==AUTORIZAR_SALIDA){
 esperandoSalida=true;
 pantalla.mostrarMensaje("Ya puedes", "Salir");
 //LIMPIAMOS LA RESPUESTA;
 respuestaProcessing=SIN_RESPUESTA;
+//ACTIVAMOS EL BUZZER
+
 }
 
 //INGRESO AUTORIZADO
@@ -138,6 +148,9 @@ if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
     verde.encender();
 
     barrera.abrir();
+
+    //ACTIVAMOS EL BUZZER
+    sonidoAutorizado();
 
     esperandoRespuesta=false;
     esperandoPaso=true;
@@ -155,6 +168,7 @@ if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
 
   rojo.encender();
   verde.apagar();
+  sonidoRechazado();
 
   tiempoError=millis();
   errorActivo=true;
@@ -171,6 +185,7 @@ if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
 
   rojo.encender();
   verde.apagar();
+  sonidoRechazado();
 
   tiempoError=millis();
   errorActivo=true;
@@ -187,6 +202,7 @@ if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
 
  rojo.encender();
  verde.apagar();
+ sonidoRechazado();
 
  tiempoError=millis();
  errorActivoEstacionamiento=true;
@@ -233,6 +249,7 @@ if(distanciaSalida>0 && distanciaSalida<=DISTANCIA_MAX){
   //ABRIMOS LA BARRERA
   barrera.abrir();
   verde.encender();
+  sonidoAutorizado();
 
   pantalla.mostrarMensaje("Salida completa", "Hasta luego...");
 
@@ -269,6 +286,7 @@ cierrePendiente=true;
 }
 }
 
+
 //ESPERAMOS PARA CERRAR LA BARRERA
 if(cierrePendiente && millis()-tiempoPaso>=TIEMPO_CIERRE){
 
@@ -280,10 +298,17 @@ vehiculoDetectado=false;
 
 pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 }
+
+
+//MANEJO DEL TIEMPO DEL BUZZER
+if(buzzerSonando && millis()-tiempoBuzzer>=300){
+
+  noTone(A0);
+  buzzerSonando=false;
+}
   delay(200);
 }
-
-
+//TERMINA LA FUNCION LOOP
 
 
 
@@ -343,5 +368,15 @@ if(Serial.available()>0){
 }
 
 
+//FUNCIONES PARA EL MANEJO DEL BUZZER
+void sonidoAutorizado(){
+  tone(A0,1500);
+  tiempoBuzzer=millis();
+  buzzerSonando=true;
+}
 
-
+void sonidoRechazado(){
+  tone(A0,400);
+  tiempoBuzzer=millis();
+  buzzerSonando=true;
+}
