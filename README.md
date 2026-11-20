@@ -1,21 +1,57 @@
-
-# Estacionamiento Inteligente RFID
+# Estacionamiento Inteligente con RFID
 
 ## Descripción del proyecto
 
-Este proyecto corresponde al trabajo final de la materia **Informática II**, de la carrera de **Ingeniería Electrónica** de la Universidad Tecnológica Nacional (UTN), Facultad Regional Mendoza.
+Este proyecto corresponde al trabajo final de la materia **Informática II**, de la carrera Ingeniería Electrónica de la Universidad Tecnológica Nacional, Facultad Regional Mendoza.
 
-Consiste en un sistema de estacionamiento inteligente con capacidad para 4 vehículos, que utiliza un **Arduino UNO** para controlar los componentes electrónicos y **Processing** para gestionar los usuarios mediante una interfaz gráfica.
+Consiste en un sistema de estacionamiento inteligente con capacidad para **4 vehículos**, que utiliza Arduino UNO para controlar los componentes electrónicos y Processing para administrar los usuarios mediante una interfaz gráfica.
 
-El sistema permite identificar usuarios mediante tarjetas RFID, verificar sus créditos disponibles, controlar el acceso a través de una barrera automática y registrar la ocupación de las plazas.
+## Funcionamiento general
 
-También permite gestionar el ingreso y la salida de vehículos, registrar nuevos usuarios, cargar créditos y conservar la información mediante archivos CSV.
+El sistema permite controlar el ingreso y la salida de vehículos mediante tarjetas RFID.
 
-##Componenetes electronicos utilizados
-_Arduino uno R3
-_Led rgb(utilizamos solamente red y green)
-_Servo motor
-_2 sensores ultrasonicos(HC-SR04)
+- Detecta vehículos mediante sensores ultrasónicos.
+- Identifica las tarjetas mediante un lector RFID RC522.
+- Verifica la autorización y los créditos disponibles de cada usuario en la aplicacion Processing.
+- Controla una barrera mediante un servomotor.
+- Utiliza indicadores LED y un buzzer para informar el resultado de la autorización.
+- Muestra información en una pantalla LCD.
+- Permite visualizar las plazas disponibles y ocupadas desde Processing.
+- Guarda información de usuarios y del estado de las plazas en archivos CSV.
 
+## Tecnologías utilizadas
 
+- Arduino UNO R3
+- Lenguaje C++
+- Processing
+- Comunicación serial
+- Archivos CSV
+- Git y GitHub
+
+## Organización del repositorio
+
+```text
+proyecto_informatica_2/
+├── ARDUINO/
+│   └── PROYECTO-FINAL-ARDUINO/
+├── PROCESSING/
+│   └── Proyecto_final/
+└── README.md
+```
+
+Cada carpeta contiene el código correspondiente y su documentación.
+
+## Comunicación Arduino–Processing
+
+Arduino se encarga de los sensores y actuadores, mientras que Processing administra los usuarios, sus créditos y las plazas del estacionamiento.
+
+Ambos programas intercambian información mediante comunicación serial.
+
+## Autor
+
+Emanuel Occhiuto
+
+Ingeniería Electrónica — UTN Facultad Regional Mendoza
+
+Materia: Informática II — 2026
 
