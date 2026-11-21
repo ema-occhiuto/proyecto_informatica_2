@@ -85,7 +85,7 @@ AUTORIZAR_SALIDA
 
 Se implementó el método numérico de Newton-Raphson para corregir las mediciones de distancia a partir de una función de calibración obtenida experimentalmente.
 
-## Requisitos
+## Requisitos para ejecutar el codigo en arduino
 
 - Arduino IDE
 - Biblioteca SPI
