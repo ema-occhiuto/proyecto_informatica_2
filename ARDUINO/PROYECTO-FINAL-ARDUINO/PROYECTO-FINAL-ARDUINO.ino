@@ -102,7 +102,8 @@ void loop(){
     if(!vehiculoDetectado){
 
       vehiculoDetectado=true;
-
+      
+      //ENVIAMOS A PROCESSING
       Serial.println("Vehiculo detectado");
       Serial.println("Acerque su tarjeta RFID");
       
@@ -118,7 +119,7 @@ void loop(){
     String uid=rfid.obtenerUID();
 
     pantalla.mostrarMensaje("Tarjeta ledia", "Espere por favor...");
-
+    //ENVIAMOS A PROCESSING
     Serial.print("UID:");
     Serial.println(uid);
 
@@ -275,7 +276,7 @@ float distanciaPaso=sensorPaso.leerMedicion();///Guardamos el dato con la presic
 //EL VEHICULO COMEINZA A PASAR
 if(distanciaPaso>0 && distanciaPaso<=DISTANCIA_MAX){//detecta el segundo sensor el vehiculo a esa distancia
 
-
+//CONFIRMAMOS EL INGRESO A PROCESSING
 Serial.println("INGRESO_CONFIRMADO");
 
 //GUARDAMOS CUANDO SE DETECTO EL SEGUNDO SENSOR
