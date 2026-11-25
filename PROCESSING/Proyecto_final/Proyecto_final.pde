@@ -122,14 +122,6 @@ void dibujarPlazas() {
     
     int numeroPlaza=i+1;
 
-    //RESALTAR LA PLAZA SELECCIONADA
-    if(plazaSeleccionada==numeroPlaza){
-      stroke(verde);
-      strokeWeight(4);
-    }else{
-      noStroke();
-    }
-    
     // FONDO DE CADA PLAZA
     fill(panel);
     rect(x, y, 215, 170, 12);
@@ -179,24 +171,8 @@ void mostrarContadores() {
 
 
 
-//DIBUJAR BOTONES DE INGRESO,SALIDA,REGISTRAR USUARIO,CREDITOS
+//DIBUJAR BOTONES DE REGISTRAR USUARIO,CREDITOS
 void dibujarBotones(){
-  
-  //BOTON DE INGRESO
-  fill(verde);
-  rect(200,510,250,65,12);//dibuja el rectangulo
-  
-  fill(blanco);
-  textAlign(CENTER);
-  textSize(20);
-  text("INGRESO",325,550);
-  
-  //BOTON DE SALIDA
-  fill(rojo);
-  rect(550,510,250,65,12);
-  
-   fill(blanco);
-  text("SALIDA", 675, 550);
   
   //BOTON DE REGISTRAR USUARIOS
   fill(azul);
