@@ -17,35 +17,42 @@ class Estacionamiento{
   
   
   
-  //VERIFICAR SI UNA PLAZA ESTA LIBRE
-  public boolean plazaLibre(int numeroPlaza){
-  
-  if(numeroPlaza<1||numeroPlaza>capacidadMaxima){
-    return false;
+// BUSCAR LA PLAZA QUE OCUPA UN UID
+public int buscarPlazaPorUID(String uid){
+
+  if(uid==null || uid.trim().isEmpty()){
+    return -1;
   }
-  
-  if(plazas[numeroPlaza-1]==null){//si la plaza esta libre, devuelve true
-    return true;
+
+  for(int i=0; i<capacidadMaxima; i++){
+
+    if(plazas[i]!=null &&
+       plazas[i].equalsIgnoreCase(uid.trim())){
+
+      return i+1;
+    }
   }
- else{
-   return false;//devuelve false si esta ocupada
- }
+
+  return -1;
 }
 
 
 
 
 //VERIFICAMOS SI HAY ALGUN LUGAR DISPONIBLE
-public boolean hayLugar(){
+public int hayLugar(){
   for(int i=0;i<capacidadMaxima;i++){
     
     if(plazas[i]==null){//verifica los lugares disponibles
       
-      return true;
+      return i+1;
     }
   }
-  return false;
+  return -1;
 }
+
+
+
 
 
 
