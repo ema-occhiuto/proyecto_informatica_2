@@ -80,14 +80,10 @@ void draw() {
   //VENTANA DE REGISTROS DE USUARIOS
   if(mostrandoRegistro){
     dibujarFormularioRegistro();
-  }
-  else{
+  }else{
     if(mostrandoCargaCreditos){
       dibujarFormularioCreditos();
-    }
-  
-    
-    else{
+    } else{
 
   // TITULO
   fill(blanco);
@@ -410,38 +406,6 @@ else{
   }
   
 else{
-  // SELECCIONAR UNA PLAZA
-  for (int i = 0; i < 4; i++) {//Aca es para ver que plaza seleccionamos
-
-    int x = 40 + i * 240;
-    int y = 130;
-
-    if (mouseX >= x && mouseX <= x + 215 &&
-        mouseY >= y && mouseY <= y + 170) {
-
-      plazaSeleccionada = i + 1;//ESTE MODIFICA EL VALOR DE LA PLAZA SELECCIONADA
-
-      println("Plaza seleccionada: " + plazaSeleccionada);
-      return;
-    }
-  }
-
-  // BOTON INGRESO,puede saber que boton tocamos, si el de ingreso o salida
-  if (mouseX >= 200 && mouseX <= 450 &&
-      mouseY >= 510 && mouseY <= 575) {
-
-      ejecutarBoton(1);
-      return;
-  }
-
-  // BOTON SALIDA
-  if (mouseX >= 550 && mouseX <= 800 &&
-      mouseY >= 510 && mouseY <= 575) {
-
-     ejecutarBoton(2);
-     return;
-  }
-  
   //BOTON DE REGISTRAR USUARIOS
   if(mouseX>=200 && mouseX<=450 &&
   mouseY>=610 && mouseY<=675){
@@ -531,11 +495,11 @@ void ejecutarBoton(int boton){
   switch(boton){
     
     case 1:
-    autorizarIngreso();
+    
     break;
     
     case 2:
-    autorizarSalida();
+    
     break;
     
     case 3:
@@ -629,13 +593,7 @@ void procesarMensaje(String mensaje) {
 
 //AUTORIZAR INGRESO AL ESTACIONAMIENTO
 void autorizarIngreso(){
-  
-  //VERIFICAMOS QUE SE HAYA SELECCIONADO UNA PLAZA
-  if(plazaSeleccionada==0){
-    println("Primero seleccione una plaza");
-    return;
-  }
-  
+
   // VERIFICAMOS SI YA HAY UN INGRESO PENDIENTE
   if (ingresoPendiente||salidaPendiente) {
   println("Ya existe un ingreso pendiente");
@@ -659,24 +617,28 @@ void autorizarIngreso(){
     comunicacion.enviarMensaje("ERROR:TARJETA");
     return;
   }
+  
+    //VERIFICAMOS SI EL USUARIO YA ESTA ESTACIONADO
+    if(estacionamiento.buscarPlazaPorUID(uidRecibido)!=-1){
+    println("El usuario ya esta estacionado");
+    comunicacion.enviarMensaje("ERROR:ESTACIONADO");
+    return;
+}
     
     //VERIFICAMOS SI TIENE CREDITOS
     if(usuario.obtenerSaldo()<=0){
-      println("Usuario sin credito");
-      comunicacion.enviarMensaje("ERROR:CREDITOS");
-      return;
+     println("Usuario sin credito");
+     comunicacion.enviarMensaje("ERROR:CREDITOS");
+     return;
     }
     
+    //BUSCAMOS UNA PLAZA LIBRE AUTOMATICAMENTE
+     int plazaLibre=estacionamiento.hayLugar();
+     
     //VERIFICAMOS SI HAY LUGAR EN EL ESTACIONAMIENTO
-    if(!estacionamiento.hayLugar()){
+    if(plazaLibre==-1){
       println("Estacionamiento completo");
       comunicacion.enviarMensaje("ERROR:COMPLETO");
-      return;
-    }
-    
-    //VERIFICAMOS SI SE SELECCIONO UNA PLAZA LIBRE
-    if(!estacionamiento.plazaLibre(plazaSeleccionada)){
-      println("Seleccione una plaza libre");
       return;
     }
     
@@ -685,14 +647,14 @@ void autorizarIngreso(){
     
     //GUARDAMOS LOS DATOS DEL INGRESO PENDIENTE,esperando confirmacion del segundo sensor
     uidPendiente=uidRecibido;
-    plazaPendiente=plazaSeleccionada;
+    plazaPendiente=plazaLibre;
     ingresoPendiente=true;
     
     //CALCULAMOS LOS CREDITOS QUE QUEDARAN DESPUES DEL INGRESO
     int CreditosRestantes=usuario.obtenerSaldo()-1;
     
     //ENVIAMOS LA AUTORIZACION Y EL NOMBRE A ARDUINO
-    comunicacion.enviarMensaje("AUTORIZADO:"+usuario.obtenerNombre()+":"+CreditosRestantes);
+    comunicacion.enviarMensaje("AUTORIZADO:"+usuario.obtenerNombre()+":"+CreditosRestantes+":"+plazaPendiente);
     
     println("Esperando la confrimacion del segundo sensor");
    
@@ -700,13 +662,7 @@ void autorizarIngreso(){
 
 //AUTORIZAMOS EGRESO DEL ESTACIONAMIENTO
 void autorizarSalida(){
-  
-  //VERIFICAMOS QUE SE HAYA SELECCIONADO UNA PLAZA
-  if(plazaSeleccionada==0){
-    println("Primero seleccione una plaza");
-    return;
-  }
-  
+
   //VERIFICAMOS QUE NO HAYA OTRA SALIDA PENDIENTE
   if(salidaPendiente||ingresoPendiente){
     println("Ya existe una salida pendiente");
