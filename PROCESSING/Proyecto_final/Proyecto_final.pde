@@ -39,6 +39,9 @@ String creditosCargar="";
 // CAMPO SELECCIONADO
 int campoActivo = 0;
 
+//UID ADMINISTRATIVO
+String uidAdministrativo="";
+
 //
 
 
@@ -345,7 +348,7 @@ void mousePressed() {
   if (mouseX >= 270 && mouseX <= 730 &&
       mouseY >= 245 && mouseY <= 290) {
 
-    campoActivo = 1;
+    campoActivo = 1;//Estas vaiables globales las usamos en la funcion keypressed
     return;
   }
 
@@ -493,20 +496,11 @@ if(campoActivo==4){
 
 void ejecutarBoton(int boton){
   switch(boton){
-    
-    case 1:
-    
-    break;
-    
-    case 2:
-    
-    break;
-    
-    case 3:
+     case 3:
    mostrandoRegistro=true;
    
    //UTILIZAMOS EL ULTIMO UID RECIBIDO
-   uidRegistro=uidRecibido;
+   uidRegistro=uidAdministrativo;
     break;
     
     case 4:
@@ -517,7 +511,7 @@ void ejecutarBoton(int boton){
     mostrandoCargaCreditos=true;
     
     //UTILIZAMOS EL ULTIMO UID RECIBIDO
-    uidCargarCreditos=uidRecibido;
+    uidCargarCreditos=uidAdministrativo;
     
     Usuario usuario=gestor.buscarUsuario(uidCargarCreditos);//buscamos el usuario con su id, para cargar creditos
    
@@ -578,6 +572,9 @@ void procesarMensaje(String mensaje) {
  
   println("UID de ingreso:"+uidRecibido);
   
+  //GUARDAMOS EL UID EN OTRA VARIABLE LOCAL PARA EL MANEJO DE REGISTRO Y CREDITOS
+  uidAdministrativo=uidRecibido;
+  
   //EJECUTAMOS LA FUNCION autorizarIngreso
   autorizarIngreso();
   }
@@ -592,6 +589,7 @@ void procesarMensaje(String mensaje) {
    
    //EJECUTAMOS LA FUNCION autorizarSalida
    autorizarSalida();
+ }
    
  
  //ENVIO DE INGRESO CONFIRMADO DESDE ARDUINO
