@@ -51,6 +51,15 @@ public int hayLugar(){
   return -1;
 }
 
+//VERIFICAMOS SI UNA PLAZA ESPECIFICA ESTA LIBRE
+public boolean plazaLibre(int numeroPlaza){
+
+  if(numeroPlaza<1 || numeroPlaza>capacidadMaxima){
+    return false;
+  }
+
+  return plazas[numeroPlaza-1]==null;
+}
 
 
 

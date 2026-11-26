@@ -6,8 +6,6 @@ Estacionamiento estacionamiento;
 GestorUsuarios gestor;
 
 
-//PLAZA SELECCIONADA CON EL MOUSE
-int plazaSeleccionada=0;
 
 // ULTIMO UID RECIBIDO DESDE ARDUINO
 String uidRecibido = "";
@@ -42,7 +40,7 @@ int campoActivo = 0;
 //UID ADMINISTRATIVO
 String uidAdministrativo="";
 
-//
+
 
 
 // COLORES
@@ -104,7 +102,7 @@ void draw() {
   // MOSTRAMOS LOS CONTADORES
   mostrarContadores();
   
-  //MOSTRAMOS LOS BOTONES DE INGRESO Y SALIDA
+  //MOSTRAMOS LOS BOTONES ADMINISTRATIVOSD
   dibujarBotones();
     }
   }
