@@ -794,6 +794,10 @@ void confirmarSalida(){
   
   if(!salidaRegistrada){
     println("Error al registrar la salida");
+    //LIMPIAMOS LAS VARIABLES PENDIENTES
+      plazaSalidaPendiente=0;
+      salidaPendiente=false;
+      uidRecibido="";
     return;
   }
   
@@ -803,6 +807,7 @@ void confirmarSalida(){
   //LIMPIAMOS LAS VARIABLES PENDIENTES
   plazaSalidaPendiente=0;
   salidaPendiente=false;
+  uidRecibido="";
   
 }
     
