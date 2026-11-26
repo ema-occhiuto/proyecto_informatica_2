@@ -570,14 +570,29 @@ void procesarMensaje(String mensaje) {
   
   mensaje=mensaje.trim();
   
-  //RECUBIMOS EL UID
-  if (mensaje.startsWith("UID:")) {//esta funcion se encarga que los primeros caracteres que envia arduino coincidan con el mismo
+  //RECIBIMOS EL UID PARA INGRESAR
+  if (mensaje.startsWith("UID_INGRESO:")) {//esta funcion se encarga que los primeros caracteres que envia arduino coincidan con el mismo
   
   //EXTRAEMOS EL UID
- uidRecibido=mensaje.substring(4).trim();//GUARDA LA DIRECCION UID.Aplicamos trim() para que borre el salto de linea
+ uidRecibido=mensaje.substring(12).trim();//GUARDA LA DIRECCION UID.Aplicamos trim() para que borre el salto de linea
  
-  println("UID recibido:"+uidRecibido);
+  println("UID de ingreso:"+uidRecibido);
+  
+  //EJECUTAMOS LA FUNCION autorizarIngreso
+  autorizarIngreso();
   }
+ 
+ //RECIBIMOS EL UID PARA SALIR
+ if(mensaje.startsWith("UID_SALIDA:")){
+   
+   //EXTRAEMOS EL UID
+   uidRecibido=mensaje.substring(11).trim();
+   
+   println("UID de salida:"+uidRecibido);
+   
+   //EJECUTAMOS LA FUNCION autorizarSalida
+   autorizarSalida();
+   
  
  //ENVIO DE INGRESO CONFIRMADO DESDE ARDUINO
   if(mensaje.equals("INGRESO_CONFIRMADO")){
@@ -589,6 +604,7 @@ void procesarMensaje(String mensaje) {
     confirmarSalida();
   }
 }
+
 
 
 //AUTORIZAR INGRESO AL ESTACIONAMIENTO
@@ -633,10 +649,10 @@ void autorizarIngreso(){
     }
     
     //BUSCAMOS UNA PLAZA LIBRE AUTOMATICAMENTE
-     int plazaLibre=estacionamiento.hayLugar();
+     int plazaEntrada=estacionamiento.hayLugar();
      
     //VERIFICAMOS SI HAY LUGAR EN EL ESTACIONAMIENTO
-    if(plazaLibre==-1){
+    if(plazaEntrada==-1){
       println("Estacionamiento completo");
       comunicacion.enviarMensaje("ERROR:COMPLETO");
       return;
@@ -647,7 +663,7 @@ void autorizarIngreso(){
     
     //GUARDAMOS LOS DATOS DEL INGRESO PENDIENTE,esperando confirmacion del segundo sensor
     uidPendiente=uidRecibido;
-    plazaPendiente=plazaLibre;
+    plazaPendiente=plazaEntrada;
     ingresoPendiente=true;
     
     //CALCULAMOS LOS CREDITOS QUE QUEDARAN DESPUES DEL INGRESO
@@ -660,6 +676,8 @@ void autorizarIngreso(){
    
 }
 
+
+
 //AUTORIZAMOS EGRESO DEL ESTACIONAMIENTO
 void autorizarSalida(){
 
@@ -669,14 +687,24 @@ void autorizarSalida(){
     return;
   }
     
-  //VERIFICAMOS QUE LA PLAZA ESTE OCUPADA 
-  if(estacionamiento.plazaLibre(plazaSeleccionada)){
-    println("La plaza seleccionada ya esta libre");
+  //VERIFICAMOS QUE TENEMOS UN UID
+  if(uidRecibido.isEmpty()){
+    println("No se recibio ninguna tarjeta");
+    return;
+  }
+  
+  //BUSCAMOS LA PLAZA QUE OCUPA EL USUARIO
+  int plazaSalida=estacionamiento.buscarPlazaPorUID(uidRecibido);
+  
+  //VERIFICAMOS SI EL USUARIO ESTA ESTACIONADO
+  if(plazaSalida==-1){
+    println("El usuario no esta estacionado");
+    comunicacion.enviarMensaje("ERROR:NO ESTACIONADO");
     return;
   }
   
   //GUARDAMOS LA SALIDA PENDIENTE
-  plazaSalidaPendiente=plazaSeleccionada;
+  plazaSalidaPendiente=plazaSalida;
   salidaPendiente=true;
   
   //ENVIAMOS LA AUTORIZACION A ARDUINO
