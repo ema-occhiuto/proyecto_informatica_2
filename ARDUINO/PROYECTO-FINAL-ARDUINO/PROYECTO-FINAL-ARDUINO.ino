@@ -47,16 +47,17 @@ enum EstadoRespuesta{
     ERROR_TARJETA,
     ERROR_CREDITOS,
     ERROR_COMPLETO,
-    AUTORIZAR_SALIDA,
-    SALIDA_CONFIRMADA
+    ERROR_ESTACIONADO,
+    ERROR_NO_ESTACIONADO,
+    AUTORIZAR_SALIDA
 };
-
 //ESTADO ACTUAL DE LA RESPUESTA 
 EstadoRespuesta respuestaProcessing=SIN_RESPUESTA;
 
 //DATOS DEL USUARIO AUTORIZADO
 String nombreAutorizado="";
 int CreditosRestantes=0;
+int plazaAsignada=0;
 //-------------------------------------------------
 
 //ESTADOS DEL ESTACIONAMIENTO
@@ -68,7 +69,6 @@ enum EstadoSistema{
     CERRANDO_BARRERA,
     MOSTRANDO_ERROR
 };
-
 //ESTADO INICIAL DEL SISTEMA
 EstadoSistema estadoActual=ESPERANDO_VEHICULO;
 
@@ -151,63 +151,88 @@ if(estadoActual==ESPERANDO_VEHICULO){
 }
 
 
-
-
-
-
-
-
-
-
-
- 
-  //SI HAY VEHICULO, ESPERAMOS LA TARJETA
-  if(vehiculoDetectado && rfid.hayTarjeta()){
+//SI HAY VEHICULO, ESPERAMOS LA TARJETA RFID
+if(estadoActual=ESPERANDO_TARJETA && rfid.hayTarjeta()){
     
     String uid=rfid.obtenerUID();
 
     pantalla.mostrarMensaje("Tarjeta leida", "Espere por favor...");
-    //ENVIAMOS A PROCESSING
+    
+    //VERIFICAMOS EL SENTIDO DE INGRESO
+    if(sentidoActual==INGRESO){
+
     Serial.print("UID_INGRESO:");
     Serial.println(uid);
+}else{
+  if(sentidoActual==SALIDA){
 
-    //ESPERAMOS LA RESPUESTA DE PROCESSING
-    esperandoRespuesta=true;
+    Serial.print("UID_SALIDA:");
+    Serial.println(uid);
   }
+}
+
+//ESPERAMOS LA RESPUESTA DE PROCESSING
+estadoActual=ESPERANDO_RESPUESTA;
+}
+
 
 //RECIBIMOS LOS DATOS DE PROCESSING
   recibirDatosProcessing();
 
-//SALIDA AUTORIZADA POR PROCESSING
-if(respuestaProcessing==AUTORIZAR_SALIDA){
-esperandoSalida=true;
-pantalla.mostrarMensaje("Ya puedes", "Salir");
-//LIMPIAMOS LA RESPUESTA;
+//INGRESO AUTORIZADO POR PROCESSING
+if(estadoActual==ESPERANDO_RESPUESTA && sentidoActual==INGRESO && respuestaProcessing==AUTORIZADO){
+
+//MOSTRAMOS LOS DATOS EN EL LCD
+pantalla.mostrarMensaje(nombreAutorizado,"Plaza: "+String(plazaAsignada));
+
+//CONTROLAMOS LOS LEDS
+verde.encender();
+rojo.apagar();
+
+//ABRIMOS LA BARRERA
+barrera.abrir();
+
+sonidoAutorizado();//activamos el buzzer
+
+//LIMPIAMOS LA RESPUESTA
 respuestaProcessing=SIN_RESPUESTA;
-//ACTIVAMOS EL BUZZER
 
+//ESPERAMOS LA CONFIRMACION DEL SENSOR
+estadoActual=ESPERANDO_PASO;
 }
 
-//INGRESO AUTORIZADO
-if(esperandoRespuesta && respuestaProcessing==AUTORIZADO){
+//SALIDA AUTORIZADA POR PROCESSING
+if(estadoActual==ESPERANDO_RESPUESTA &&
+   sentidoActual==SALIDA &&
+   respuestaProcessing==AUTORIZAR_SALIDA){
 
+  //MOSTRAMOS MENSAJE EN EL LCD
+  pantalla.mostrarMensaje("Salida autorizada","Puede salir");
 
-    pantalla.mostrarMensaje(nombreAutorizado, "Creditos:"+String(CreditosRestantes));//MOSTRAMOS POR LCD
+  //CONTROLAMOS LOS LED
+  verde.encender();
+  rojo.apagar();
 
-    verde.encender();
+  //ABRIMOS LA BARRERA
+  barrera.abrir();
 
-    barrera.abrir();
+  //ACTIVAMOS EL BUZZER
+  sonidoAutorizado();
 
-    //ACTIVAMOS EL BUZZER
-    sonidoAutorizado();
+  //LIMPIAMOS LA RESPUESTA
+  respuestaProcessing=SIN_RESPUESTA;
 
-    esperandoRespuesta=false;
-    esperandoPaso=true;
-    
-    //LIMPIAMOS LA RESPUESTA
-    respuestaProcessing=SIN_RESPUESTA;
-
+  //ESPERAMOS LA CONFIRMACION DEL SENSOR
+  estadoActual=ESPERANDO_PASO;
 }
+
+
+
+
+
+
+
+
 
   //TARJETA NO REGISTRADA
   else if(esperandoRespuesta && respuestaProcessing==ERROR_TARJETA){
@@ -363,59 +388,76 @@ if(buzzerSonando && millis()-tiempoBuzzer>=300){
 
 
 void recibirDatosProcessing(){
+//INICIAMOS LA COMUNICACION CON EL PUERTO SERIE
 if(Serial.available()>0){
 
   String mensaje=Serial.readStringUntil('\n');//Recibimos la info que nos llega por puerto serial y la almacenamos
 
   mensaje.trim();
 
-  // PROCESAMOS LA AUTORIZACION DE SALIDA
-  if (mensaje == "AUTORIZAR_SALIDA") {
-    respuestaProcessing = AUTORIZAR_SALIDA;
+  //VERIFICAMOS QUE ESTEMOS ESPERANDO UNA RESPUESTA
+  if(estadoActual!=ESPERANDO_RESPUESTA){
     return;
   }
 
-  if(!esperandoRespuesta){
-    return;
-  }
-
-  //VERIFICAMOS SI EL INGRESO FUE AUTORIZADO
+  //INGRESO AUTORIZADO
   if(mensaje.startsWith("AUTORIZADO:")){
 
-    int separador=mensaje.indexOf(':',11);//buscamos el segundo separador,la posicion depende del largo del nombre
-    
-    //COMPROBAMOS QUE EXISTE EL CARACTER
-    if(separador!=1){
+    int separador1=mensaje.indexOf(':',11)//buscamos el segundo separador despues del separador autorizado(depende el nombre de usuario)
+    int separador2=mensaje.indexOf(':',separador1+11);//buscamos el tercer separador(":")
+
+    //VERIFICAMOS QUE EXISTAN LOS SEPARADORES
+    if(separador1!=-1 && separador2!=-1){
+
     //EXTRAEMOS EL NOMBRE DE USUARIO
-    nombreAutorizado=mensaje.substring(11,separador);
+    nombreAutorizado=mensaje.substring(11,separador1);
 
-    //EXTRAEMOS LOS CREDITOS RESTATNTES
-    String saldotexto=mensaje.substring(separador+1);//lo guardamos en una variable local
+    //EXTRAEMOS LOS CREDITOS RESTANTES 
+    CreditosRestantes=mensaje.substring(separador1+1,separador2).toInt();//con el toInt convertimos el string a un numero int
+    
+    //EXTRAEMOS LA PLAZA ASIGNADA
+    plazaAsignada=mensaje.substring(separador2+1).toInt();
 
-    CreditosRestantes=saldotexto.toInt();//lo convertimos a entero
-
-    //GUARDAMOS EL ESTADO DE AUTORIZACION
+    //ACTUALIZAMOS RESPUESTA
     respuestaProcessing=AUTORIZADO;
+
     }
   }
-  
-  //TARJETA NO REGISTRADA
-  else if(mensaje=="ERROR:TARJETA"){
-    respuestaProcessing=ERROR_TARJETA;
-  }
 
-  //CREDITOS INSUFICIENTES
-  else if(mensaje=="ERROR:CREDITOS"){
-    respuestaProcessing=ERROR_CREDITOS;
-  }
-
-  //ESTACIONAMIENTO COMPLETO
-  else if(mensaje="ERROR:COMPLETO"){
-    respuestaProcessing=ERROR_COMPLETO;
-  }
-}
+ //SALIDA AUTORIZADA
+ else if(mensaje=="AUTORIZAR_SALIDA"){
+  respuestaProcessing=AUTORIZAR_SALIDA;
 }
 
+ //TARJETA NO REGISTRADA
+ else if(mensaje=="ERROR:TARJETA"){
+  respuestaProcessing=ERROR_TARJETA;
+}
+
+ //CREDITOS INSUFICIENTES
+ else if(mensaje=="ERROR:CREDITOS"){
+  respuestaProcessing=ERROR_CREDITOS;
+}
+
+ //ESTACIONAMIENTO COMPLETO
+ else if(mensaje=="ERROR:COMPLETO"){
+  respuestaProcessing=ERROR_COMPLETO;
+}
+
+ //USUARIO YA ESTACIONADO
+ else if(mensaje=="ERROR:ESTACIONADO"){
+  respuestaProcessing=ERROR_ESTACIONADO;
+}
+
+ //USUARIO NO ESTACIONADO
+ else if(mensaje=="ERROR:NO_ESTACIONADO"){
+  respuestaProcessing=ERROR_NO_ESTACIONADO;
+}
+}
+}
+ 
+
+ 
 
 //FUNCIONES PARA EL MANEJO DEL BUZZER
 void sonidoAutorizado(){
