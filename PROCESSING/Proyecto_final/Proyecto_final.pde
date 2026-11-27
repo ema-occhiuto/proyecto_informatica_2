@@ -51,6 +51,13 @@ color rojo = color(230, 80, 80);
 color blanco = color(255);
 color azul=color(50,120,220);
 
+//ESTADO DEL SISTEMA ACTUAL
+String mensajeEstado="Esperando vehiculo...";
+String detalleEstado="Sistema disponible";
+color colorEstado=verde;
+
+
+
 
 
 
@@ -104,6 +111,8 @@ void draw() {
   
   //MOSTRAMOS LOS BOTONES ADMINISTRATIVOSD
   dibujarBotones();
+  
+  dibujarEstadoSistema();
     }
   }
 }
@@ -165,6 +174,42 @@ void mostrarContadores() {
   text(estacionamiento.obtenerOcupados(), 500, 430);//OCUPADOS
   text(estacionamiento.obtenerDisponibles(), 810, 430);//DISPONIBLES
 }
+
+
+//DIBUJAR EL ESTADO DEL SISTEMA
+void dibujarEstadoSistema(){
+  
+ //FONDO DEL PANEL
+ fill(panel);
+ rect(40,490,920,100,12);
+ 
+ //TITULO
+ fill(180);
+ textAlign(LEFT);
+ textSize(14);
+ text("ESTADO DEL SISTEMA",60,515);
+ 
+ //CIRCULO LUMINOSO
+ fill(colorEstado);
+ ellipse(68,540,14,14);
+ 
+ //MENSAJE PRINCIPAL
+ textSize(22);
+ text(mensajeEstado,85,547);
+ 
+ //DETALLE DEL MENSAJE
+ fill(blanco);
+ textSize(16);
+ text(detalleEstado,60,574);
+}
+  
+//ACTUALIZAR EL ESTADO DEL SISTEMA
+void actualizarEstado(String mensaje,String detalle,color estado){
+  mensajeEstado=mensaje;
+  detalleEstado=detalle;
+  colorEstado=estado;
+}
+  
 
 
 
@@ -615,7 +660,7 @@ void autorizarIngreso(){
   //VERIFICAMOS QUE TENGAMOS UN UID
   if(uidRecibido.isEmpty()){
     println("No se recibio ninguna tarjeta");
-    return;
+  return;
   }
     
     //BUSCAMOS EL USUARIO EN LA LISTA ENLAZADA
@@ -627,6 +672,9 @@ void autorizarIngreso(){
     
     //ENVIAMOS MENSAJE A ARDUINO
     comunicacion.enviarMensaje("ERROR:TARJETA");
+    
+    //ACTUALIZAMOS ESTADO 
+    actualizarEstado("Ingreso rechazado","Tarjeta no registrada",rojo);
     return;
   }
   
@@ -634,6 +682,9 @@ void autorizarIngreso(){
     if(estacionamiento.buscarPlazaPorUID(uidRecibido)!=-1){
     println("El usuario ya esta estacionado");
     comunicacion.enviarMensaje("ERROR:ESTACIONADO");
+    
+    //ACTUALIZAMOS ESTADO
+    actualizarEstado("Ingreso rechazado","Usuario ya estacionado",rojo);
     return;
 }
     
@@ -641,6 +692,9 @@ void autorizarIngreso(){
     if(usuario.obtenerSaldo()<=0){
      println("Usuario sin credito");
      comunicacion.enviarMensaje("ERROR:CREDITOS");
+     
+     //ACTUALIZAMOS ESTADO
+    actualizarEstado("Ingreso rechazado","Usuario sin creditos",rojo);
      return;
     }
     
@@ -651,6 +705,9 @@ void autorizarIngreso(){
     if(plazaEntrada==-1){
       println("Estacionamiento completo");
       comunicacion.enviarMensaje("ERROR:COMPLETO");
+      
+    //ACTUALIZAMOS ESTADO
+    actualizarEstado("Ingreso rechazado","Estacionamiento completo",rojo);
       return;
     }
     
@@ -667,6 +724,9 @@ void autorizarIngreso(){
     
     //ENVIAMOS LA AUTORIZACION Y EL NOMBRE A ARDUINO
     comunicacion.enviarMensaje("AUTORIZADO:"+usuario.obtenerNombre()+":"+CreditosRestantes+":"+plazaPendiente);
+    
+    //ACTUALIZAMOS ESTADO
+     actualizarEstado("Ingreso autorizado",usuario.obtenerNombre()+" - Plaza "+plazaPendiente,verde);
     
     println("Esperando la confrimacion del segundo sensor");
    
@@ -696,6 +756,8 @@ void autorizarSalida(){
   if(plazaSalida==-1){
     println("El usuario no esta estacionado");
     comunicacion.enviarMensaje("ERROR:NO ESTACIONADO");
+    
+    actualizarEstado("Salida rechazada","Usuario no estacionado",rojo);
     return;
   }
   
@@ -726,6 +788,13 @@ boolean registrado=estacionamiento.registrarIngreso(plazaPendiente,uidPendiente)
 
 if(!registrado){
   println("Error al registrar el vehiculo");
+
+  //LIMPIAMOS LAS VARIABLES PENDIENTES
+  uidPendiente="";
+  plazaPendiente=0;
+  ingresoPendiente=false;
+  uidRecibido="";
+
   return;
 }
 
