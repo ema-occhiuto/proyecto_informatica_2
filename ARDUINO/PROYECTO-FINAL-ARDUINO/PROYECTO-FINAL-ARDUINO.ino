@@ -115,30 +115,50 @@ pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 //FUNCION LOOP
 void loop(){
 
+//DETECTAMOS LA PRESENCIA DE UN VEHIUCLO
+if(estadoActual==ESPERANDO_VEHICULO){
 
-
-
-  //GENERAMOS UNA MEDICION
+  //GENERAMOS UNA MEDICION CON EL SENSOR DE ENTRADA
   sensorEntrada.generarMedicion();
-
-
   float distancia=sensorEntrada.leerMedicion();//Guardamos el dato con la presicion del calculo Newton-Raphson
 
-  if(distancia>0 && distancia<=DISTANCIA_MAX &&
-     !esperandoSalida && !cierrePendiente){
-      
-    if(!vehiculoDetectado){
 
-      vehiculoDetectado=true;
+  //VERIFICAMOS SI HAY UN VEHICULO INGRESANDO
+  if(distancia>0 && distancia<=DISTANCIA_MAX){
       
-      //ENVIAMOS A PROCESSING
-      Serial.println("Vehiculo detectado");
-      Serial.println("Acerque su tarjeta RFID");
+      //ACTUALIZAMOS ESTADO DEL SISTEMA
+      sentidoActual=INGRESO;
+      estadoActual=ESPERANDO_TARJETA;
       
       //MOSTRAMOS MENSAJE EN LCD
       pantalla.mostrarMensaje("Auto detectado", "Acerque tarjeta");
+    }else{
+
+      //MEDIMOS EL SENSOR DE SALIDA
+      sensorPaso.generarMedicion();
+      float distanicaPaso=sensorPaso.leerMedicion();
+
+      //VERIFICAMOS SI HAY UN VEHICULO SALIENDO
+      if(distanciaPaso>0 && distanciaPaso<DISTANCIA_MAX){
+
+        //ACTUALIZAMOS ESTADO DEL SISTEMA
+        sentidoActual=SALIDA;
+        estadoActual=ESPERANDO_TARJETA;
+
+        pantalla.mostrarMensaje("Auto saliendo", "Acerque su tarjeta");
+      }
     }
-  }
+}
+
+
+
+
+
+
+
+
+
+
 
  
   //SI HAY VEHICULO, ESPERAMOS LA TARJETA
