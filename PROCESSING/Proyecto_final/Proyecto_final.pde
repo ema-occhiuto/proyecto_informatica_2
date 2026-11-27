@@ -757,6 +757,7 @@ void autorizarSalida(){
     println("El usuario no esta estacionado");
     comunicacion.enviarMensaje("ERROR:NO ESTACIONADO");
     
+    //ACTUALIZAMOS ESTADO
     actualizarEstado("Salida rechazada","Usuario no estacionado",rojo);
     return;
   }
@@ -767,6 +768,10 @@ void autorizarSalida(){
   
   //ENVIAMOS LA AUTORIZACION A ARDUINO
   comunicacion.enviarMensaje("AUTORIZAR_SALIDA");
+  
+  //ACTUALIZAMOS ESTADO
+  actualizarEstado("Salida autorizada","Vehiculo de la plaza "+plazaSalidaPendiente,azul);
+
   
   println("Salida autorizada. Esperando confirmacion del arduino");
 }
@@ -788,6 +793,9 @@ boolean registrado=estacionamiento.registrarIngreso(plazaPendiente,uidPendiente)
 
 if(!registrado){
   println("Error al registrar el vehiculo");
+  
+  //ACTUALIZAMOS ESTADO
+  actualizarEstado("Error de ingreso","No se pudo registrar el vehiculo",rojo);
 
   //LIMPIAMOS LAS VARIABLES PENDIENTES
   uidPendiente="";
@@ -805,6 +813,9 @@ if (usuario == null) {
   println("Error: usuario pendiente no encontrado");
   println("El vehiculo ingreso, pero no se pudo identificar al usuario");
 
+  //ACTUALIZAMOS ESTADO
+  actualizarEstado("Error de ingreso","Usuario no encontrado",rojo);
+  
   // LIMPIAMOS LAS VARIABLES PENDIENTES
   uidPendiente = "";
   plazaPendiente = 0;
@@ -820,6 +831,9 @@ boolean descontado=usuario.descontarIngreso();
 if (!descontado) {
   println("Error al descontar credito");
   println("El vehiculo ingreso, pero el saldo no se actualizo");
+  
+  //ACTUALIZAMOS ESTADO
+  actualizarEstado("Error de ingreso","No se pudo actualizar el saldo",rojo);
 
   // LIMPIAMOS LAS VARIABLES PENDIENTES
   uidPendiente = "";
@@ -831,12 +845,16 @@ if (!descontado) {
 }
 
 //GUARDAMOS EL SALDO ACTUALIZADO
-gestor.guardarUsuarios();
+gestor.guardarUsuarios();//solo actualizamos el saldo
 
   println("Ingreso confirmado");
   println("Usuario: " + usuario.obtenerNombre());
   println("Plaza: " + plazaPendiente);
   println("Saldo restante: " + usuario.obtenerSaldo());
+
+
+//ACTUALIZAMOS ESTADO
+actualizarEstado("Ingreso confirmado",usuario.obtenerNombre()+" - Plaza "+plazaPendiente+" - Creditos restantes: "+usuario.obtenerSaldo(),verde);
 
   // LIMPIAMOS LAS VARIABLES PENDIENTES
   uidPendiente = "";
@@ -844,6 +862,7 @@ gestor.guardarUsuarios();
   ingresoPendiente = false;
   uidRecibido = "";
 }
+
 
 
 //CONFIRMAMOS SALIDA DEL ESTACIONAIENTO
@@ -859,6 +878,9 @@ void confirmarSalida(){
   
   if(!salidaRegistrada){
     println("Error al registrar la salida");
+    
+    //ACTUALIZAMOS ESTADO
+    actualizarEstado("Error de salida","No se pudo registrar la salida",rojo);
     //LIMPIAMOS LAS VARIABLES PENDIENTES
       plazaSalidaPendiente=0;
       salidaPendiente=false;
@@ -868,6 +890,9 @@ void confirmarSalida(){
   
   //MOSTRAMOS LA CONFIRMACION
   println("Salida confirmada de la plaza"+plazaSalidaPendiente);
+  
+  //ACTUALIZAMOS ESTADO
+  actualizarEstado("Salida confirmada","Plaza"+plazaSalidaPendiente+"liberada",verde);
   
   //LIMPIAMOS LAS VARIABLES PENDIENTES
   plazaSalidaPendiente=0;
