@@ -59,6 +59,31 @@ String nombreAutorizado="";
 int CreditosRestantes=0;
 //-------------------------------------------------
 
+//ESTADOS DEL ESTACIONAMIENTO
+enum EstadoSistema{
+    ESPERANDO_VEHICULO,
+    ESPERANDO_TARJETA,
+    ESPERANDO_RESPUESTA,
+    ESPERANDO_PASO,
+    CERRANDO_BARRERA,
+    MOSTRANDO_ERROR
+};
+
+//ESTADO INICIAL DEL SISTEMA
+EstadoSistema estadoActual=ESPERANDO_VEHICULO;
+
+//SENTIDO DE CIRCULACION
+enum SentidoCirculacion{
+
+  SIN_SENTIDO,
+  INGRESO,
+  SALIDA
+};
+
+//ESTADO DE CIRCULACION INICIAL
+SentidoCirculacion sentidoActual=SIN_SENTIDO;
+
+
 void recibirDatosProcessing();
 void sonidoAutorizado();
 void sonidoRechazado();
@@ -90,6 +115,9 @@ pantalla.mostrarMensaje("Estacionamiento", "Bienvenidos");
 //FUNCION LOOP
 void loop(){
 
+
+
+
   //GENERAMOS UNA MEDICION
   sensorEntrada.generarMedicion();
 
@@ -118,9 +146,9 @@ void loop(){
     
     String uid=rfid.obtenerUID();
 
-    pantalla.mostrarMensaje("Tarjeta ledia", "Espere por favor...");
+    pantalla.mostrarMensaje("Tarjeta leida", "Espere por favor...");
     //ENVIAMOS A PROCESSING
-    Serial.print("UID:");
+    Serial.print("UID_INGRESO:");
     Serial.println(uid);
 
     //ESPERAMOS LA RESPUESTA DE PROCESSING
