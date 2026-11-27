@@ -55,6 +55,8 @@ color azul=color(50,120,220);
 String mensajeEstado="Esperando vehiculo...";
 String detalleEstado="Sistema disponible";
 color colorEstado=verde;
+int tiempoEstado=0;
+final int DURACION_ESTADO=5000;
 
 
 
@@ -208,8 +210,29 @@ void actualizarEstado(String mensaje,String detalle,color estado){
   mensajeEstado=mensaje;
   detalleEstado=detalle;
   colorEstado=estado;
-}
   
+  //GUARDAMOS EL INSTANTE DE LA ACTUALIZACION
+  tiempoEstado=millis();
+}
+
+
+//RESTABLECER EL ESTADO DEL SISTEMA
+void restablecerEstado(){
+  
+  //VERIFICAMOS QUE NO HAYAN OPERACIONES PENDIENTES 
+  if(!ingresoPendiente && !salidaPendiente){
+    
+    //VERIFICAMOS SI TRANSCURRIERON 5 SEGUNDOS
+    if(millis()-tiempoEstado>=DURACION_ESTADO){
+      
+      mensajeEstado="Esperando vehiculo...";
+      detalleEstado="Sistema disponible";
+      colorEstado=verde;
+    }
+  }
+}
+      
+    
 
 
 
